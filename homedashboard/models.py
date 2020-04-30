@@ -22,6 +22,7 @@ class Home(models.Model):
     property_source_url = models.TextField(default='')
     city = models.TextField(default='')
     type_of_property = models.TextField(default='')
+    year_of_construction = models.IntegerField(null=True)
     
 class Screenshot(models.Model):
     home = models.ForeignKey(Home, on_delete=models.CASCADE)

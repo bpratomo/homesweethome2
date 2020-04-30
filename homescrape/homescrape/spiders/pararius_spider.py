@@ -22,10 +22,7 @@ start_url_setting = [
 
 # Conversion function 
 def convert_currency_text_to_number(currency_text):
-    print(currency_text)
     currency_text = currency_text[:currency_text.find(' ')]
-    print(currency_text)
-
     currency_number = float(currency_text.replace('€','').replace(',',''))
     return currency_number
 
@@ -86,7 +83,7 @@ class ParariusSpider(scrapy.Spider):
         p['postcode']                   = response.xpath("//div[@class ='listing-detail-summary__location']/text()").get()[:7] 
         p['price']                      = float(response.xpath("//meta[@itemprop='price']/@content").get())
 
-
+        #######################################################################################################################################################################
         feature_description_text        =  response.xpath("//dd[@class='listing-features__description listing-features__description--for_rent_price']/span/text()").get() 
         p['including_utilities']          = "including" in feature_description_text.lower()
         p['state_of_furnishing']        = "unfurnished" if "unfurnished" in feature_description_text else "furnished"
@@ -96,6 +93,7 @@ class ParariusSpider(scrapy.Spider):
 
         p['energy_label']               = response.xpath("//dd[contains(@class,'energy-label')]/span/text()").get()
 
+        #######################################################################################################################################################################
 
         description_paragraphs          = response.xpath("//div[contains(@class,'additional')]//p")
         description_text                = []
@@ -111,6 +109,7 @@ class ParariusSpider(scrapy.Spider):
         p['city']                       = url_elements[-3]
         p['type_of_property']           = response.xpath("//dd[contains(@class,'dwelling')]/span/text()").get()
 
+        #######################################################################################################################################################################
 
         available_from_string           = response.xpath("//dd[contains(@class,'acceptance')]/span/text()").get()
 
@@ -118,6 +117,9 @@ class ParariusSpider(scrapy.Spider):
 
         offered_since_string            = response.xpath("//dd[contains(@class,'offered')]/span/text()").get()
         p['offered_since']              = convert_string_to_datetime(offered_since_string) 
+
+        year_of_construction_el         = int(response.xpath("//dd[contains(@class,'construction_period')]/span/text()").get())
+        p['year_of_construction']       = int(year_of_construction_el) if year_of_construction_el.isdigit() else None
 
 
         homerecord = p.save()
@@ -133,19 +135,7 @@ class ParariusSpider(scrapy.Spider):
                                     home = homerecord
                                     )
                 s.save()
-                                
-        
-        # # The rest of the screenshot
-        # list_of_inactive_screenshot = response.xpath('//ul[@id="photos"]/li/img/@data-src').getall()
-        # for link in list_of_inactive_screenshot:
-        #     s = ScreenshotItem(link=link, 
-        #             home = homerecord
-        #             )
-        #     s.save()
-
-        # Save distances 
-        # for href in response.xpath("//iframe[@class='listing-points-of-interest']/@src").getall():
-        #     yield scrapy.Request(href, callback=self.parse_distances, meta={'homerecord': 'homerecord'})
+                         
 
 
     # def parse_distances(self,response):
