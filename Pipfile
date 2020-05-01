@@ -11,6 +11,7 @@ pandas = "*"
 scrapy = "*"
 scrapy-djangoitem = "*"
 django-cors-headers = "*"
+djangorestframework = "*"
 
 [requires]
 python_version = "3.8"
