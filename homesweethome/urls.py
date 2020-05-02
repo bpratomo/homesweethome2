@@ -15,8 +15,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework import routers
+from homedashboard import views
+
+router = routers.DefaultRouter()
+router.register(r'dashboard',views.DashboardViewSet)
 
 urlpatterns = [
+    path('api/',include(router.urls)),
     path('admin/', admin.site.urls),
-    path('', include('homedashboard.urls'))
+    path('', include('homedashboard.urls')),
 ]
