@@ -58,11 +58,38 @@
     <div class="container">
 
         <div id='homelisting'>
-            <template v-for="item in homelist">
+            <template v-for="(item,index) in homelist">
                 <div class="card m-4">
                     <div class="card-body">
-                        <h4 class="card-title">[[item.region]]</h4>
-                        <p class="card-text">[[item.type_of_property]]</p>
+
+                        <div :id="'carousel'+index" class="carousel slide" data-ride="carousel">
+                            <div class="carousel-inner" role="listbox">
+                                <template v-for="(screenshot,sindex) in item.screenshots">
+
+                                   <div v-if="sindex==0" class="carousel-item active">
+                                        <img class="d-block mw-100 mh-100" :src="screenshot" alt="First slide">
+                                    </div>
+                                    <div v-else class="carousel-item">
+                                        <img class="d-block mw-100 mh-100" :src="screenshot" alt="index">
+                                    </div> 
+                                </template>
+
+                            </div>
+
+                            <a class="carousel-control-prev" :href="'#carousel'+index" role="button" data-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Previous</span>
+                            </a>
+                            <a class="carousel-control-next" :href="'#carousel'+index" role="button" data-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Next</span>
+                            </a>
+                        </div>
+
+
+
+                        <h4 class="card-title">[[item.property_name]]</h4>
+                        <p class="card-text">[[item.description_from_tenant]]</p>
                     </div>
                 </div>
             </template>

@@ -25,8 +25,11 @@ class Home(models.Model):
     year_of_construction = models.IntegerField(null=True)
     
 class Screenshot(models.Model):
-    home = models.ForeignKey(Home, on_delete=models.CASCADE)
+    home = models.ForeignKey(Home,related_name='screenshots', on_delete=models.CASCADE)
     link = models.TextField()
+
+    def __str__(self):
+        return '%s' % (self.link)
 
 class Distance(models.Model):
     home = models.ForeignKey(Home, on_delete=models.CASCADE)
