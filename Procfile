@@ -1,1 +1,1 @@
-web: gunicorn homedashboard.wsgi --log-file -
+web: gunicorn homesweethome.wsgi --log-file -
