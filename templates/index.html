@@ -48,17 +48,17 @@
 
 
 {% comment %} Section Dashboard {% endcomment %}
-    <div class='d-flex flex-row column-containers align-items-center flex-wrap mw-75'>
+    <div class='d-flex flex-row column-containers flex-wrap mw-60'>
 
-        <div class="container first-column sticky-top bg-light p-2">
+        <div class="container flex-grow-1 mw-50 first-column sticky-top bg-light p-2">
             <div id='mydashboard'>
             </div>
         </div>
 
         <div class="container second-column">
 
-            <div id='homelisting'>
-                <template v-for="(item,index) in homelist">
+            <div id='homelisting' :key="componentKey">
+                <template v-for="(item,index) in homelist" >
                     <div class="card m-4">
                         <div class="card-body">
 
@@ -169,6 +169,7 @@
     .column-containers {
         top: 50px;
         position: sticky;
+        max-height:30vh;
     }
 </style>
 

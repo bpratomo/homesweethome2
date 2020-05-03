@@ -19,5 +19,6 @@ class DashboardSerializer(serializers.HyperlinkedModelSerializer):
             'id_from_website',
             'screenshots',
             'description_from_tenant',
-            'property_name'
+            'property_name',
+            'id'
         ]

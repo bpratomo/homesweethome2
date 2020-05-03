@@ -38,6 +38,7 @@ function generateTraces(input_data, hue_column) {
             var final_trace = {
                 x: targetTrace.map(a => a.area),
                 y: targetTrace.map(a => a.price),
+                ids: targetTrace.map(a => a.id),
                 mode: 'markers',
                 type: 'scatter',
                 marker: {
@@ -53,6 +54,7 @@ function generateTraces(input_data, hue_column) {
     return traceArray;
 }
 
+var rendered_data = dashboard_data
 
 
 getDashboardData(rest_framework_url);
@@ -64,9 +66,13 @@ function generatePlotlyChart(input_data) {
 
     var data = generateTraces(dashboard_data, 'city');
 
-    Plotly.newPlot('mydashboard', data,layout)
+    Plotly.newPlot('mydashboard', data, layout)
+
 
 };
+
+
+
 
 
 function initializeVueApp() {
@@ -74,30 +80,58 @@ function initializeVueApp() {
         delimiters: ['[[', ']]'],
         el: '#homelisting',
         data: {
-          homelist: dashboard_data
+            componentKey: 0,
+            homelist: rendered_data
+        },
+        methods: {
+            forceRerender() {
+                this.componentKey += 1;
+            }
         }
-      });
-    return app    
-    
+    });
+    return app
+
 }
 
 var fullDataArray = [];
 var layout = {
     autosize: true,
+    dragmode: 'select',
     margin: {
-      l: 50,
-      r: 50,
-      b: 100,
-      pad: 4
+        l: 50,
+        r: 50,
+        b: 100,
+        t: 100,
+        pad: 4
     }
 };
-
+var vueApp;
 function waitForElement() {
     if (typeof dashboard_data !== "undefined" && typeof Plotly !== "undefined") {
         generatePlotlyChart(dashboard_data);
-        var vueApp = initializeVueApp();
-        myPlot.on('plotly_selected',function(eventData){
-            fullDataArray = eventData.points.map(a=>a.fullData.uid)
+        rendered_data = dashboard_data;
+        vueApp = initializeVueApp();
+        myPlot.on('plotly_selected', function (eventData) {
+            fullDataArray = eventData.points.map(a => a.data.ids[a.pointNumber]);
+            vueApp.homelist = rendered_data =dashboard_data.filter(function(item){return fullDataArray.includes(item.id)});
+            vueApp.forceRerender();
+            
+
+        });
+
+        myPlot.on('plotly_click', function (point) {
+            fullDataArray = point
+
+        });
+
+        myPlot.on('plotly_legendclick', function (curveData) {
+            fullDataArray = curveData.data[curveData.curveNumber].ids;
+            console.log(curveData);
+
+        });
+
+        myPlot.on('plotly_relayout', function (eventData) {
+            fullDataArray = eventData.points.map(a => a.fullData.ids)
         });
     } else {
         setTimeout(waitForElement, 250);
