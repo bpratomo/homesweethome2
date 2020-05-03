@@ -64,7 +64,7 @@ function generatePlotlyChart(input_data) {
 
     var data = generateTraces(dashboard_data, 'city');
 
-    Plotly.newPlot('mydashboard', data)
+    Plotly.newPlot('mydashboard', data,layout)
 
 };
 
@@ -82,7 +82,15 @@ function initializeVueApp() {
 }
 
 var fullDataArray = [];
-
+var layout = {
+    autosize: true,
+    margin: {
+      l: 50,
+      r: 50,
+      b: 100,
+      pad: 4
+    }
+};
 
 function waitForElement() {
     if (typeof dashboard_data !== "undefined" && typeof Plotly !== "undefined") {

@@ -48,52 +48,61 @@
 
 
 {% comment %} Section Dashboard {% endcomment %}
-<div class='d-flex flex-row flex-wrap m-4 mw-75'>
+    <div class='d-flex flex-row column-containers align-items-center flex-wrap mw-75'>
 
-    <div class="container sticky-top p-2">
-        <div id='mydashboard'>
+        <div class="container first-column sticky-top bg-light p-2">
+            <div id='mydashboard'>
+            </div>
         </div>
-    </div>
 
-    <div class="container">
+        <div class="container second-column">
 
-        <div id='homelisting'>
-            <template v-for="(item,index) in homelist">
-                <div class="card m-4">
-                    <div class="card-body">
+            <div id='homelisting'>
+                <template v-for="(item,index) in homelist">
+                    <div class="card m-4">
+                        <div class="card-body">
 
-                        <div :id="'carousel'+index" class="carousel slide" data-ride="carousel">
-                            <div class="carousel-inner" role="listbox">
-                                <template v-for="(screenshot,sindex) in item.screenshots">
+                            <div :id="'carousel'+index" class="carousel slide bg-dark h-50 mh-50" data-ride="carousel">
+                                <div class="carousel-inner" role="listbox">
+                                    <template v-for="(screenshot,sindex) in item.screenshots">
 
-                                   <div v-if="sindex==0" class="carousel-item active">
-                                        <img class="d-block mw-100 mh-100" :src="screenshot" alt="First slide">
-                                    </div>
-                                    <div v-else class="carousel-item">
-                                        <img class="d-block mw-100 mh-100" :src="screenshot" alt="index">
-                                    </div> 
-                                </template>
+                                        <div v-if="sindex==0" class="carousel-item active">
+                                            <img class="d-block gallery-fixed" :src="screenshot" alt="First slide">
+                                        </div>
+                                        <div v-else class="carousel-item">
+                                            <img class="d-block gallery-fixed " :src="screenshot" alt="index">
+                                        </div>
+                                    </template>
 
+                                </div>
+
+                                <a class="carousel-control-prev" :href="'#carousel'+index" role="button"
+                                    data-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="sr-only">Previous</span>
+                                </a>
+                                <a class="carousel-control-next" :href="'#carousel'+index" role="button"
+                                    data-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="sr-only">Next</span>
+                                </a>
                             </div>
 
-                            <a class="carousel-control-prev" :href="'#carousel'+index" role="button" data-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="sr-only">Previous</span>
-                            </a>
-                            <a class="carousel-control-next" :href="'#carousel'+index" role="button" data-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="sr-only">Next</span>
-                            </a>
+                            <hr />
+
+                            <h4 class="card-title">[[item.property_name]]</h4>
+                            <p :id="'description'+index" class="card-text collapse" aria-expanded="false">
+                                [[item.description_from_tenant]]</p>
+                            <div class='expandbuttondiv'>
+                                <a role="button" class="collapsed" data-toggle="collapse" :href="'#description'+index"
+                                    aria-expanded="false" aria-controls="collapseExample"></a>
+                            </div>
                         </div>
-
-
-
-                        <h4 class="card-title">[[item.property_name]]</h4>
-                        <p class="card-text">[[item.description_from_tenant]]</p>
                     </div>
-                </div>
-            </template>
+                </template>
+            </div>
         </div>
+
     </div>
 
 
@@ -103,9 +112,6 @@
 
 
 
-
-
-</div>
 
 
 
@@ -113,6 +119,60 @@
 
 
 {% block scripts %}
+<style>
+    .second-column .gallery-fixed {
+        max-height: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #mydashboard{
+        align-content: center;
+    }
+    .card .expandbuttondiv a.collapsed:after {
+        content: '+ Show More';
+    }
+
+    .card .expandbuttondiv a:not(.collapsed):after {
+        content: '- Show Less';
+    }
+
+    .card .column-containers .collapse:not(.show) {
+        display: block;
+
+            {
+            % comment %
+        }
+
+        height=lineheight * no of lines to display;
+
+            {
+            % endcomment %
+        }
+
+        height: 2em;
+        overflow: hidden;
+    }
+
+    .card .column-containers .collapsing {
+        height: 2em;
+    }
+
+    .column-containers .second-column {
+        overflow-y: scroll;
+        height: 100vh
+    }
+
+    .first-column {
+        top: 50px;
+    }
+
+    .column-containers {
+        top: 50px;
+        position: sticky;
+    }
+</style>
+
+
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="{% static 'js/dashboard_data.js' %}"></script>
 
