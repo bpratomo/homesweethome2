@@ -141,5 +141,4 @@ function waitForElement() {
 waitForElement();
 
 var b = 7;
-
 // Render the home details list Vue APP
