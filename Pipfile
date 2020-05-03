@@ -12,6 +12,7 @@ scrapy = "*"
 scrapy-djangoitem = "*"
 django-cors-headers = "*"
 djangorestframework = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.8"
