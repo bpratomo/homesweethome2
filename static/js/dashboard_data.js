@@ -23,6 +23,10 @@ function getDashboardData(dashboardurl) {
 
 };
 
+
+
+var myPlot = document.getElementById('mydashboard');
+
 function generateTraces(input_data, hue_column) {
     var nonUniqueHueValues = input_data.map(a => a[hue_column]);
     var uniqueHueValues = [...new Set(nonUniqueHueValues)];
@@ -64,12 +68,35 @@ function generatePlotlyChart(input_data) {
 
 };
 
+
+function initializeVueApp() {
+    var app = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#homelisting',
+        data: {
+          homelist: dashboard_data
+        }
+      });
+    return app    
+    
+}
+
+var fullDataArray = [];
+
+
 function waitForElement() {
     if (typeof dashboard_data !== "undefined" && typeof Plotly !== "undefined") {
-        generatePlotlyChart(dashboard_data)
+        generatePlotlyChart(dashboard_data);
+        var vueApp = initializeVueApp();
+        myPlot.on('plotly_selected',function(eventData){
+            fullDataArray = eventData.points.map(a=>a.fullData.uid)
+        });
     } else {
         setTimeout(waitForElement, 250);
     }
 };
 
 waitForElement();
+
+
+// Render the home details list Vue APP
