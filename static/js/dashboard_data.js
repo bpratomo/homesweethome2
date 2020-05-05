@@ -3,31 +3,57 @@ var plotlyjscdn = document.createElement('script')
 plotlyjscdn.setAttribute('src', "https://cdn.plot.ly/plotly-latest.min.js")
 document.body.appendChild(plotlyjscdn)
 
-var rest_framework_url = document.getElementById('rest_framework_url').getAttribute('data-url')
-console.log
-var dashboard_data;
-console.log('Sending request......')
 
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Create ajax call to get the dashboard data.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var dashboard_data;
+
+var rest_framework_url = document.getElementById('rest_framework_url').getAttribute('data-url')
+
 function getDashboardData(dashboardurl) {
     var xhttp = new XMLHttpRequest();
     xhttp.open("GET", dashboardurl, true);
     xhttp.send()
+
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-            dashboard_data = JSON.parse(this.responseText);
+            dashboard_data= JSON.parse(this.responseText);
         }
 
     }
 
 };
+getDashboardData(rest_framework_url);
 
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Generate dashboard chart
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 var myPlot = document.getElementById('mydashboard');
+var plotConfig = {responsive: true}
+
+var plotlayout = {
+    autosize: true,
+    dragmode: 'select',
+    margin: {
+        l: 50,
+        r: 50,
+        b: 100,
+        t: 100,
+        pad: 4
+    }
+};
+
+var rendered_data = dashboard_data 
 
 function generateTraces(input_data, hue_column) {
+    
+    // Based on the hue_column, the function will generate individual traces per hue value to feed into Plotly
     var nonUniqueHueValues = input_data.map(a => a[hue_column]);
     var uniqueHueValues = [...new Set(nonUniqueHueValues)];
     var traceArray = [];
@@ -54,27 +80,27 @@ function generateTraces(input_data, hue_column) {
     return traceArray;
 }
 
-var rendered_data = dashboard_data
 
-
-getDashboardData(rest_framework_url);
-
-
-//Generate plotly chart
-function generatePlotlyChart(input_data) {
-    //Generate plotly chart
-
-    var data = generateTraces(dashboard_data, 'city');
-
-    Plotly.newPlot('mydashboard', data, layout)
+function generatePlotlyChart(input_data, layout, config) {
+    var data = generateTraces(input_data, 'city');
+    Plotly.newPlot('mydashboard', data, layout,config)
 
 
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Plotly interactivity
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var selectedPoints = [];
+var selectedTrace = [];
+function selectPoints(eventData) {
+    selectedPoints = eventData.points.map(a => a.data.ids[a.pointNumber]);
+    vueApp.homelist = rendered_data =dashboard_data.filter(function(item){return selectedPoints.includes(item.id)});
+    vueApp.forceRerender();
+}
 
-
-
-
+//Vue App Instance
+var vueApp;
 function initializeVueApp() {
     var app = new Vue({
         delimiters: ['[[', ']]'],
@@ -93,52 +119,30 @@ function initializeVueApp() {
 
 }
 
-var fullDataArray = [];
-var layout = {
-    autosize: true,
-    dragmode: 'select',
-    margin: {
-        l: 50,
-        r: 50,
-        b: 100,
-        t: 100,
-        pad: 4
-    }
-};
-var vueApp;
-function waitForElement() {
+//Initialize whole page
+function InitializeWholePage() {
     if (typeof dashboard_data !== "undefined" && typeof Plotly !== "undefined") {
-        generatePlotlyChart(dashboard_data);
+        generatePlotlyChart(dashboard_data,plotlayout,plotConfig);
         rendered_data = dashboard_data;
         vueApp = initializeVueApp();
-        myPlot.on('plotly_selected', function (eventData) {
-            fullDataArray = eventData.points.map(a => a.data.ids[a.pointNumber]);
-            vueApp.homelist = rendered_data =dashboard_data.filter(function(item){return fullDataArray.includes(item.id)});
-            vueApp.forceRerender();
-            
-
-        });
-
-        myPlot.on('plotly_click', function (point) {
-            fullDataArray = point
-
+        myPlot.on('plotly_selected', function(eventData){
+            selectPoints(eventData);
         });
 
         myPlot.on('plotly_legendclick', function (curveData) {
-            fullDataArray = curveData.data[curveData.curveNumber].ids;
+            selectedPoints = curveData.data[curveData.curveNumber].ids;
             console.log(curveData);
 
         });
 
         myPlot.on('plotly_relayout', function (eventData) {
-            fullDataArray = eventData.points.map(a => a.fullData.ids)
+            selectedPoints = eventData.points.map(a => a.fullData.ids)
         });
     } else {
-        setTimeout(waitForElement, 250);
+        setTimeout(InitializeWholePage, 250);
     }
 };
 
-waitForElement();
+InitializeWholePage();
 
-var b = 7;
 // Render the home details list Vue APP
