@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Home
 
-class DashboardSerializer(serializers.HyperlinkedModelSerializer):
+class HomeSerializer(serializers.HyperlinkedModelSerializer):
     screenshots = serializers.StringRelatedField(many=True)
 
     class Meta:
@@ -10,7 +10,6 @@ class DashboardSerializer(serializers.HyperlinkedModelSerializer):
             'price',
             'area',
             'energy_label',
-            'city',
             'type_of_property',
             'region',
             'postcode',
@@ -22,3 +21,14 @@ class DashboardSerializer(serializers.HyperlinkedModelSerializer):
             'property_name',
             'id'
         ]
+
+class SimpleDashboardSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Home
+        fields = [
+            'price',
+            'area',
+            'city',
+            'id'
+        ]
+

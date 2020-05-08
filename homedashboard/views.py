@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.views.generic import ListView
 from .models import Home, Screenshot
 from rest_framework import viewsets, permissions
-from .serializers import DashboardSerializer
+from .serializers import HomeSerializer, SimpleDashboardSerializer
 
 # Create your views here.
 class HomeListView(ListView):
@@ -17,6 +17,13 @@ class HomeListView(ListView):
         context["property_types"] = Home.objects.values('type_of_property').distinct()
         return context
     
+
+
 class DashboardViewSet(viewsets.ModelViewSet):
+    queryset = Home.objects.order_by('-id')
+    serializer_class = SimpleDashboardSerializer
+
+
+class HomeViewSet(viewsets.ModelViewSet):
     queryset = Home.objects.all()
-    serializer_class = DashboardSerializer
+    serializer_class = HomeSerializer

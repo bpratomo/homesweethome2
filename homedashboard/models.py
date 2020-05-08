@@ -1,6 +1,21 @@
 from django.db import models
+import uuid
 
 # Create your models here.
+
+class ScrapeId(models.Model):
+    scrapedate = models.DateTimeField(auto_now_add=True, blank=True)
+    scrapeId = models.UUIDField(default=uuid.uuid4)
+
+    def __str__(self):
+        pass
+
+    class Meta:
+        db_table = ''
+        managed = True
+        verbose_name = 'ScrapeId'
+        verbose_name_plural = 'ScrapeIds'
+
 
 class Home(models.Model):
     id_from_website = models.TextField()

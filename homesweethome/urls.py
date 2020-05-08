@@ -20,12 +20,10 @@ from homedashboard import views
 
 router = routers.DefaultRouter()
 router.register(r'dashboard',views.DashboardViewSet,basename='dashboard')
+router.register(r'home',views.HomeViewSet,basename='dashboard')
 
 urlpatterns = [
     path('api/',include(router.urls)),
     path('admin/', admin.site.urls),
     path('', include('homedashboard.urls')),
 ]
-
-for url in router.urls:
-    print(url.__dict__)
