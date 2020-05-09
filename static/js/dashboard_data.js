@@ -10,24 +10,63 @@ document.body.appendChild(plotlyjscdn)
 // Create ajax call to get the dashboard data.
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var dashboard_data;
+//Get all Rest framework URLs from the page
 
-var rest_framework_url = document.getElementById('rest_framework_url').getAttribute('data-url')
+var urlHtmlId = {
+    latesthomeid: 'drf_latesthome',
+    dashboard_data:'drf_dashboard_data',
+    homelisting: 'drf_homelisting',
+};
 
-function getDashboardData(dashboardurl) {
-    var xhttp = new XMLHttpRequest();
-    xhttp.open("GET", dashboardurl, true);
-    xhttp.send()
+var urlObject={};
+var dataDict = {};
+var dashboardFetchStatus;
 
-    xhttp.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-            dashboard_data = JSON.parse(this.responseText);
-        }
+async function ApiCall(urlDict, key){
+    let apiUrl = urlDict[key]
+    let response = await fetch(apiUrl)
+    let data =  await response.json()
+    return data
+}
 
-    }
+
+
+
+
+
+//Check if data is still up-to-date and whether we even need to make an API call 
+
+async function compareLatestHomeId(){
+        let remoteLatestHomeId = await ApiCall(urlObject,'latesthomeid');
+        let localLatestHomeId = JSON.parse(localStorage.getItem('latesthomeid'));
+        let localDashboardData = JSON.parse(localStorage.getItem('dashboard_data'));
+        if (remoteLatestHomeId['id'] == localLatestHomeId['id'] && localDashboardData != null ) {
+            console.log('Current data is up to date!')
+
+            dataDict['dashboard_data'] = localDashboardData
+            dataDict['latesthomeid'] = localLatestHomeId
+                        
+        } else{
+            console.log('Data needs to be refreshed')
+
+            let remoteDashboardData = await ApiCall(urlObject,'dashboard_data');
+
+            
+            dataDict['dashboard_data'] = remoteDashboardData
+            dataDict['latesthomeid'] = localLatestHomeId
+
+            remoteDashboardData = JSON.stringify(remoteDashboardData)  
+            remoteLatestHomeId = JSON.stringify(remoteLatestHomeId)  
+            localStorage.setItem('latesthomeid',remoteLatestHomeId)
+            localStorage.setItem('dashboard_data',remoteDashboardData)
+
+
+        };
+        return true;
 
 };
-getDashboardData(rest_framework_url);
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -37,7 +76,7 @@ getDashboardData(rest_framework_url);
 var myPlot = document.getElementById('mydashboard');
 var plotConfig = {
     responsive: true
-}
+};
 
 var plotlayout = {
     autosize: true,
@@ -51,7 +90,7 @@ var plotlayout = {
     }
 };
 
-var rendered_data = dashboard_data;
+var rendered_data = dataDict['dashboard_data']
 var xVar = 'area';
 var yVar = 'price';
 
@@ -101,7 +140,7 @@ var xbounds = [-Infinity, Infinity];
 var ybounds = [-Infinity, Infinity];
 
 function recalculateRenderedData(selectedPoints, xbounds, ybounds) {
-
+    
     var casecount = 0;
     if (xbounds.indexOf(undefined) >= 0 | ybounds.indexOf(undefined) >= 0) {
         xbounds = [-Infinity, Infinity];
@@ -116,11 +155,11 @@ function recalculateRenderedData(selectedPoints, xbounds, ybounds) {
     };
 
     if (casecount==2) {
-        rendered_data = dashboard_data;
+        rendered_data = dataDict['dashboard_data'];
         
     } else {
 
-        rendered_data = dashboard_data.filter(
+        rendered_data = dataDict['dashboard_data'].filter(
             item => selectedPoints.includes(item.id) &&
             item[xVar] >= xbounds[0] && item[xVar] <= xbounds[1] &&
             item[yVar] >= ybounds[0] && item[yVar] <= ybounds[1]
@@ -177,10 +216,10 @@ function initializeVueApp() {
 }
 
 //Initialize whole page
-function InitializeWholePage() {
-    if (typeof dashboard_data !== "undefined" && typeof Plotly !== "undefined") {
+async function InitializeWholePage(dashboardFetchStatus) {
+    if (dashboardFetchStatus) {
+        let dashboard_data = dataDict['dashboard_data']
         generatePlotlyChart(dashboard_data, plotlayout, plotConfig);
-        rendered_data = dashboard_data;
         vueApp = initializeVueApp();
         defaultSelectedPoints= dashboard_data.map(a => a.id)
         myPlot.on('plotly_selected', function (eventData) {
@@ -208,10 +247,19 @@ function InitializeWholePage() {
         });
 
     } else {
-        setTimeout(InitializeWholePage, 250);
+        console.log('Initialization failed!')
     }
 };
 
-InitializeWholePage();
 
-// Render the home details list Vue APP
+// Render the whole page
+window.onload = async function(){
+    for (const key in urlHtmlId) {
+            const element = urlHtmlId[key];
+            urlObject[key] = document.getElementById(element).getAttribute('data-url');
+            console.log(urlObject[key]);
+    };
+    this.dashboardFetchStatus = await this.compareLatestHomeId();
+    this.InitializeWholePage(this.dashboardFetchStatus);
+    
+};

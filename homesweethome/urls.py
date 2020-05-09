@@ -20,7 +20,7 @@ from homedashboard import views
 
 router = routers.DefaultRouter()
 router.register(r'dashboard',views.DashboardViewSet,basename='dashboard')
-router.register(r'home',views.HomeViewSet,basename='dashboard')
+router.register(r'home',views.HomeViewSet,basename='home')
 
 urlpatterns = [
     path('api/',include(router.urls)),

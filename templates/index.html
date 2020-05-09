@@ -3,7 +3,9 @@
 
 {% block content %}
 
-<div id='rest_framework_url' data-url='{% url 'dashboard-list' %}'></div>
+<div id='drf_latesthome' data-url='{% url 'dashboard-detail' 1 %}'></div>
+<div id='drf_dashboard_data' data-url='{% url 'dashboard-list' %}'></div>
+<div id='drf_homelisting' data-url='{% url 'dashboard-list' %}'></div>
 
 {% comment %} Section Dropdown {% endcomment %}
 <div class='d-flex flex-row'>
