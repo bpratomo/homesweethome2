@@ -18,6 +18,13 @@ var urlHtmlId = {
     homelisting: 'drf_homelisting',
 };
 
+function loadUrls(urlHtmlId) {
+    for (const key in urlHtmlId) {
+        const element = urlHtmlId[key];
+        urlObject[key] = document.getElementById(element).getAttribute('data-url');
+};
+}
+
 var urlObject={};
 var dataDict = {};
 var dashboardFetchStatus;
@@ -28,10 +35,6 @@ async function ApiCall(urlDict, key){
     let data =  await response.json()
     return data
 }
-
-
-
-
 
 
 //Check if data is still up-to-date and whether we even need to make an API call 
@@ -254,11 +257,7 @@ async function InitializeWholePage(dashboardFetchStatus) {
 
 // Render the whole page
 window.onload = async function(){
-    for (const key in urlHtmlId) {
-            const element = urlHtmlId[key];
-            urlObject[key] = document.getElementById(element).getAttribute('data-url');
-            console.log(urlObject[key]);
-    };
+    this.loadUrls(urlHtmlId);
     this.dashboardFetchStatus = await this.compareLatestHomeId();
     this.InitializeWholePage(this.dashboardFetchStatus);
     
