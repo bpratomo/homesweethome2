@@ -5,6 +5,15 @@ document.body.appendChild(plotlyjscdn)
 
 
 
+// Render the whole page. Function described below
+window.onload = async function () {
+    this.loadUrls(urlHtmlId,urlObject);
+    let dashboardFetchStatus = await this.compareLatestHomeId();
+    this.InitializeDashboardAndList(dashboardFetchStatus);
+
+};
+
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Create ajax call to get the dashboard data.
@@ -12,60 +21,64 @@ document.body.appendChild(plotlyjscdn)
 
 //Get all Rest framework URLs from the page
 
+var urlObject = {}; //Store the urls fetched from index.html
+var dataDict = {};  //Store the result of data fetched from Django Rest Framework
+
 var urlHtmlId = {
     latesthomeid: 'drf_latesthome',
-    dashboard_data:'drf_dashboard_data',
+    dashboard_data: 'drf_dashboard_data',
     homelisting: 'drf_homelisting',
 };
 
-function loadUrls(urlHtmlId) {
+
+function loadUrls(urlHtmlId,urlObject) {
     for (const key in urlHtmlId) {
         const element = urlHtmlId[key];
         urlObject[key] = document.getElementById(element).getAttribute('data-url');
-};
+    };
 }
 
-var urlObject={};
-var dataDict = {};
-var dashboardFetchStatus;
 
-async function ApiCall(urlDict, key){
+async function ApiCall(urlDict, key) {
     let apiUrl = urlDict[key]
     let response = await fetch(apiUrl)
-    let data =  await response.json()
+    let data = await response.json()
     return data
 }
 
 
 //Check if data is still up-to-date and whether we even need to make an API call 
 
-async function compareLatestHomeId(){
-        let remoteLatestHomeId = await ApiCall(urlObject,'latesthomeid');
-        let localLatestHomeId = JSON.parse(localStorage.getItem('latesthomeid'));
-        let localDashboardData = JSON.parse(localStorage.getItem('dashboard_data'));
-        if (remoteLatestHomeId['id'] == localLatestHomeId['id'] && localDashboardData != null ) {
-            console.log('Current data is up to date!')
+async function compareLatestHomeId() {
+    let remoteLatestHomeId = await ApiCall(urlObject, 'latesthomeid');
 
-            dataDict['dashboard_data'] = localDashboardData
-            dataDict['latesthomeid'] = localLatestHomeId
-                        
-        } else{
-            console.log('Data needs to be refreshed')
+    //Get local information
+    let localLatestHomeId = JSON.parse(localStorage.getItem('latesthomeid'));
+    let localDashboardData = JSON.parse(localStorage.getItem('dashboard_data'));
 
-            let remoteDashboardData = await ApiCall(urlObject,'dashboard_data');
+    //Perform the comparison
+    if (remoteLatestHomeId['id'] == localLatestHomeId['id'] && localDashboardData != null) {
+        console.log('Current data is up to date!')
 
-            
-            dataDict['dashboard_data'] = remoteDashboardData
-            dataDict['latesthomeid'] = localLatestHomeId
+        // Store information to datadict for further use
+        dataDict['dashboard_data'] = localDashboardData
+        dataDict['latesthomeid'] = localLatestHomeId
 
-            remoteDashboardData = JSON.stringify(remoteDashboardData)  
-            remoteLatestHomeId = JSON.stringify(remoteLatestHomeId)  
-            localStorage.setItem('latesthomeid',remoteLatestHomeId)
-            localStorage.setItem('dashboard_data',remoteDashboardData)
+    } else {
+        console.log('Data needs to be refreshed')
 
+        let remoteDashboardData = await ApiCall(urlObject, 'dashboard_data');
 
-        };
-        return true;
+        // Store information to datadict for further use
+        dataDict['dashboard_data'] = remoteDashboardData
+        dataDict['latesthomeid'] = localLatestHomeId
+
+        // Store information to localstorage for future use
+        localStorage.setItem('latesthomeid', JSON.stringify(remoteLatestHomeId))
+        localStorage.setItem('dashboard_data', JSON.stringify(remoteDashboardData))
+
+    };
+    return true;
 
 };
 
@@ -93,21 +106,24 @@ var plotlayout = {
     }
 };
 
-var rendered_data = dataDict['dashboard_data']
+
 var xVar = 'area';
 var yVar = 'price';
 
 function generateTraces(input_data, hue_column) {
 
+    defaultSelectedPoints = input_data.map(a => a.id)
+
     // Based on the hue_column, the function will generate individual traces per hue value to feed into Plotly
-    var nonUniqueHueValues = input_data.map(a => a[hue_column]);
-    var uniqueHueValues = [...new Set(nonUniqueHueValues)];
-    var traceArray = [];
+    let nonUniqueHueValues = input_data.map(a => a[hue_column]);
+    let uniqueHueValues = [...new Set(nonUniqueHueValues)];
+    let traceArray = [];
 
     uniqueHueValues.forEach(
         function (item) {
-            var targetTrace = input_data.filter(a => a[hue_column] == item)
-            var final_trace = {
+            let targetTrace = input_data.filter(a => a[hue_column] == item)
+
+            let plotly_formatted_trace = {
                 x: targetTrace.map(a => a[xVar]),
                 y: targetTrace.map(a => a[yVar]),
                 ids: targetTrace.map(a => a.id),
@@ -119,7 +135,7 @@ function generateTraces(input_data, hue_column) {
                 opacity: '0.5',
                 name: item,
             };
-            traceArray.push(final_trace)
+            traceArray.push(plotly_formatted_trace)
         }
 
     );
@@ -137,46 +153,15 @@ function generatePlotlyChart(input_data, layout, config) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Plotly interactivity
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Default setting
 var selectedPoints = [];
 var defaultSelectedPoints;
 var xbounds = [-Infinity, Infinity];
 var ybounds = [-Infinity, Infinity];
 
-function recalculateRenderedData(selectedPoints, xbounds, ybounds) {
-    
-    var casecount = 0;
-    if (xbounds.indexOf(undefined) >= 0 | ybounds.indexOf(undefined) >= 0) {
-        xbounds = [-Infinity, Infinity];
-        ybounds = [-Infinity, Infinity];
-        casecount+=1;
-    };
 
-    if (selectedPoints.length == 0) {
-        selectedPoints = defaultSelectedPoints
-        casecount+=1;
-
-    };
-
-    if (casecount==2) {
-        rendered_data = dataDict['dashboard_data'];
-        
-    } else {
-
-        rendered_data = dataDict['dashboard_data'].filter(
-            item => selectedPoints.includes(item.id) &&
-            item[xVar] >= xbounds[0] && item[xVar] <= xbounds[1] &&
-            item[yVar] >= ybounds[0] && item[yVar] <= ybounds[1]
-    
-        );
-    };
-
-    vueApp.homelist = rendered_data;
-    
-    vueApp.forceRerender();
-
-};
-
-
+// Plotly interaction functions
 function selectPoints(eventData) {
     selectedPoints = eventData.points.map(a => a.data.ids[a.pointNumber]);
     recalculateRenderedData(selectedPoints, xbounds, ybounds)
@@ -188,10 +173,49 @@ function zoomToPoints(xMin, xMax, yMin, yMax) {
     recalculateRenderedData(selectedPoints, xbounds, ybounds);
 };
 
-function clickPoints(){
+function clickPoints() {
     recalculateRenderedData(selectedPoints, xbounds, ybounds);
 }
 
+
+// Feed Vue the required final lists
+function recalculateRenderedData(selectedPoints, xbounds, ybounds) {
+    let dashboard_data = dataDict['dashboard_data']
+
+    let casecount = 0;
+    // Case where no relayout has been done
+    if (xbounds.indexOf(undefined) >= 0 | ybounds.indexOf(undefined) >= 0) {
+        xbounds = [-Infinity, Infinity];
+        ybounds = [-Infinity, Infinity];
+        casecount += 1;
+    };
+
+    // Case where no points are selected
+    if (selectedPoints.length == 0) {
+        selectedPoints = defaultSelectedPoints
+        casecount += 1;
+
+    };
+
+    if (casecount == 2) {
+        // No points are actually selected. Show everything. 
+        rendered_data = dashboard_data;
+
+    } else {
+
+        rendered_data = dashboard_data.filter(
+            item => selectedPoints.includes(item.id) &&
+            item[xVar] >= xbounds[0] && item[xVar] <= xbounds[1] &&
+            item[yVar] >= ybounds[0] && item[yVar] <= ybounds[1]
+
+        );
+    };
+
+    vueApp.homelist = rendered_data;
+
+    vueApp.forceRerender();
+
+};
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -201,12 +225,12 @@ function clickPoints(){
 var vueApp;
 
 function initializeVueApp() {
-    var app = new Vue({
+    let app = new Vue({
         delimiters: ['[[', ']]'],
         el: '#homelisting',
         data: {
             componentKey: 0,
-            homelist: rendered_data
+            homelist: null,
         },
         methods: {
             forceRerender() {
@@ -219,20 +243,22 @@ function initializeVueApp() {
 }
 
 //Initialize whole page
-async function InitializeWholePage(dashboardFetchStatus) {
+async function InitializeDashboardAndList(dashboardFetchStatus) {
     if (dashboardFetchStatus) {
         let dashboard_data = dataDict['dashboard_data']
         generatePlotlyChart(dashboard_data, plotlayout, plotConfig);
         vueApp = initializeVueApp();
-        defaultSelectedPoints= dashboard_data.map(a => a.id)
+
+
+        //Setting plotly interaction function
         myPlot.on('plotly_selected', function (eventData) {
             selectPoints(eventData);
         });
-        myPlot.on('plotly_click', function(){
+        myPlot.on('plotly_click', function () {
             clickPoints();
-        });        
-        
-        myPlot.on('plotly_doubleclick', function(){
+        });
+
+        myPlot.on('plotly_doubleclick', function () {
             clickPoints();
         });
         myPlot.on('plotly_legendclick', function (curveData) {
@@ -252,13 +278,4 @@ async function InitializeWholePage(dashboardFetchStatus) {
     } else {
         console.log('Initialization failed!')
     }
-};
-
-
-// Render the whole page
-window.onload = async function(){
-    this.loadUrls(urlHtmlId);
-    this.dashboardFetchStatus = await this.compareLatestHomeId();
-    this.InitializeWholePage(this.dashboardFetchStatus);
-    
 };
