@@ -242,10 +242,33 @@ function initializeVueApp() {
         data: {
             componentKey: 0,
             homelist: null,
+            pageNumber: 0,
+            size : 10,
         },
         methods: {
             forceRerender() {
+                this.pageNumber = 0
                 this.componentKey += 1;
+            },
+            pageNext(){
+                this.pageNumber++;
+            },
+            pagePrevious(){
+                this.pageNumber--;
+            }
+
+        },
+        computed: {
+            pageCount(){
+                let l = this.homelist.length;
+                let s = this.size;
+                return Math.ceil(l/s)
+            },
+            paginatedData(){
+                const start = this.pageNumber * this.size,
+                      end = start + this.size
+                console.log([start,end])
+                return this.homelist.slice(start,end)
             }
         }
     });

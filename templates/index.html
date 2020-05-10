@@ -63,11 +63,11 @@
             <div v-if="homelist ==null">
                 <div class="jumbotron jumbotron-fluid bg-light">
                     <div class="container">
-                        <p class="lead">    
+                        <p class="lead">
                             <img src="https://media1.tenor.com/images/d6cd5151c04765d1992edfde14483068/tenor.gif?itemid=5662595"
                                 alt="Load Loading GIF - Load Loading Waiting GIFs"
                                 style="max-width: 100px; background-color: rgb(236, 236, 236);" width="25" height="25">
-                                Data is loading.....
+                            Data is loading.....
                         </p>
                     </div>
                 </div>
@@ -77,8 +77,13 @@
 
             <div v-else>
 
-
-                <template v-for="(item,index) in homelist">
+                <button @click="pagePrevious" :disabled="pageNumber==0">
+                    Previous
+                </button>
+                <button @click="pageNext" :disabled="pageNumber >= pageCount -1">
+                    Next
+                </button>
+                <template v-for="(item,index) in paginatedData">
                     <div class="card m-4">
                         <div class="card-body">
 
