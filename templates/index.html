@@ -52,12 +52,16 @@
 {% comment %} Section Dashboard {% endcomment %}
 <div class='d-flex flex-row column-containers flex-wrap mw-60'>
 
-    <div class="container flex-grow-1 mw-50 first-column sticky-top bg-light p-2">
+
+    <div class="container border flex-grow-1 mw-50 first-column sticky-top bg-light p-2 m-1">
+        <h3>Scatterplot of house prices by area color coded by cities</h3>
+        <button>Click here for instructions</button>
         <div id='mydashboard'>
         </div>
     </div>
 
-    <div class="container second-column">
+    <div class="container second-column border m-1 p-2">
+        <h3>Selected residences </h3>
 
         <div id='homelisting' :key="componentKey">
             <div v-if="homelist ==null">
@@ -77,14 +81,23 @@
 
             <div v-else>
 
-                <button @click="pagePrevious" :disabled="pageNumber==0">
+                <button @click="pagePrevious" class="btn btn-primary btn-sm m-1" :disabled="pageNumber==0">
                     Previous
                 </button>
-                <button v-for="index in [...Array(pageCount).keys()]" @click="goToPage(index)" >[[index +1]]</button>
+
+
+                <template v-for="index in [...Array(pageCount).keys()]">
+                    <span v-if="renderedButtonIndices.includes(index)">
+                        <button @click="goToPage(index)" class="btn btn-primary btn-sm m-1"
+                            v-bind:class="{ active: index==pageNumber }"
+                            >[[index +1]]</button>
+                    </span>
+                    <span v-if="index-pageNumber==5|pageNumber-index==5">...</span>
+                </template>
 
 
 
-                <button @click="pageNext" :disabled="pageNumber >= pageCount -1">
+                <button @click="pageNext" class="btn btn-primary btn-sm m-1" :disabled="pageNumber >= pageCount -1">
                     Next
                 </button>
                 <template v-for="(item,index) in paginatedData">
@@ -119,9 +132,16 @@
 
                             <hr />
 
-                            <h4 class="card-title">[[item.property_name]]</h4>
-                            <p :id="'description'+index" class="card-text collapse" aria-expanded="false">
-                                [[item.description_from_tenant]]</p>
+                            <h4 class="card-title"><span class='capitalized'>[[item.property_name]]</span> in <span
+                                    class='capitalized'>[[item.city | capitalize]]</span></h4>
+                            <h5>💸 Price: €[[item.price]] per month | 🏠 Area: [[item.area]] m2 | 🏗️ Built
+                                on:[[item.year_of_construction]] </h5>
+                            <div :id="'description'+index" class="card-text collapse" aria-expanded="false">
+
+                                <br>
+                                <p v-html="item.description_from_tenant"></p>
+
+                            </div>
                             <div class='expandbuttondiv'>
                                 <a role="button" class="collapsed" data-toggle="collapse" :href="'#description'+index"
                                     aria-expanded="false" aria-controls="collapseExample"></a>
@@ -168,25 +188,14 @@
         content: '- Show Less';
     }
 
-    .card .column-containers .collapse:not(.show) {
+    .card .column-containers .card-text .collapse:not(.show) {
         display: block;
-
-            {
-            % comment %
-        }
-
-        height=lineheight * no of lines to display;
-
-            {
-            % endcomment %
-        }
-
-        height: 2em;
+        height: 10 em;
         overflow: hidden;
     }
 
     .card .column-containers .collapsing {
-        height: 2em;
+        height: 10em;
     }
 
     .column-containers .second-column {
@@ -202,6 +211,10 @@
         top: 50px;
         position: sticky;
         max-height: 30vh;
+    }
+
+    .capitalized {
+        text-transform: capitalize
     }
 </style>
 

@@ -19,7 +19,8 @@ class HomeSerializer(serializers.HyperlinkedModelSerializer):
             'screenshots',
             'description_from_tenant',
             'property_name',
-            'id'
+            'id',
+            'city',
         ]
 
 class SimpleDashboardSerializer(serializers.HyperlinkedModelSerializer):

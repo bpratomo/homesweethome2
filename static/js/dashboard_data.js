@@ -64,8 +64,6 @@ async function fetchDashboardData(referenceId,targetDataKey) {
     //Get local information
     let localTargetData = JSON.parse(localStorage.getItem(targetDataKey));
     let latestlocalReferenceId = localTargetData ? Math.max(...localTargetData.map(a=>a.id)) : 0
-    console.log(latestlocalReferenceId)
-    console.log(remoteReferenceId['id'])
 
     //Perform the comparison
     if (remoteReferenceId['id'] == latestlocalReferenceId && localTargetData) {
@@ -275,7 +273,17 @@ function initializeVueApp() {
                       end = start + this.size
                 console.log([start,end])
                 return this.homelist.slice(start,end)
-            }
+            },
+            renderedButtonIndices(){
+
+                let startAndEndButton = [0,this.pageCount-1]
+                console.log(startAndEndButton)
+                let relativePageButtons = [...Array(this.pageNumber+4).keys()].filter(a => a>this.pageNumber-4)
+                console.log(relativePageButtons)
+                console.log('testing renderedbuttonIndices')
+                return startAndEndButton.concat(relativePageButtons)
+            },
+
         }
     });
     return app
