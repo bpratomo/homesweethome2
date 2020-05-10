@@ -6,6 +6,31 @@
 <div id='drf_latesthome' data-url='{% url 'dashboard-detail' latesthomeid.id %}'></div>
 <div id='drf_dashboard_data' data-url='{% url 'dashboard-list' %}'></div>
 <div id='drf_homelisting' data-url='{% url 'home-list' %}'></div>
+<!-- Modal -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Explore the plot!</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      
+        <ul>
+        <li><h5>Select, zoom, and relayout the scatterplot</h5></li>
+        <li><h5>See the corresponding residences</h5></li>
+        <li><h5>...</h5></li>
+        <li><h5>Profit!</h5></li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div id="overlayCarousel" class="overlay">
 
     <!-- Button to close the overlay navigation -->
@@ -28,6 +53,8 @@
     </div>
 
 </div>
+<!--
+{% comment %} 
 {% comment %} Section Dropdown {% endcomment %}
 <div class='d-flex flex-row'>
 
@@ -66,7 +93,7 @@
     </div>
 
 
-</div>
+</div>-->
 
 
 
@@ -76,7 +103,15 @@
 
     <div class="container border flex-grow-1 mw-50 first-column sticky-top bg-light p-2 m-1">
         <h3>Scatterplot of house prices by area color coded by cities</h3>
-        <button>Click here for instructions</button>
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-dark m-2" data-toggle="modal" data-target="#exampleModalCenter">
+  Click here for instructions
+</button>
+
+
+
+
+
         <div id='mydashboard'>
         </div>
     </div>
