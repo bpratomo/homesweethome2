@@ -21,6 +21,7 @@ class HomeSerializer(serializers.HyperlinkedModelSerializer):
             'property_name',
             'id',
             'city',
+            'property_source_url'
         ]
 
 class SimpleDashboardSerializer(serializers.HyperlinkedModelSerializer):

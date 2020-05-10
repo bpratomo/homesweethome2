@@ -8,19 +8,26 @@ document.body.appendChild(plotlyjscdn)
 // Render the whole page. Function described below
 window.onload = async function () {
     this.loadUrls(urlHtmlId, urlObject);
-    let dashboardFetchStatus = await this.fetchDashboardData('latesthomeid','dashboard_data');
+    let dashboardFetchStatus = await this.fetchDashboardData('latesthomeid', 'dashboard_data');
     this.InitializeDashboardAndList(dashboardFetchStatus);
-    let homelistFetchStatus = await this.fetchDashboardData('latesthomeid','homelist')
+    let homelistFetchStatus = await this.fetchDashboardData('latesthomeid', 'homelist')
     console.trace(homelistFetchStatus)
     if (homelistFetchStatus) {
         this.recalculateRenderedData()
-        
+
     }
 
 
 
 };
 
+/* Close */
+function closeNav() {
+    console.log('closing NAV!')
+    document.getElementById("overlayCarousel").style.height = "0%";
+    document.getElementById("overlayContent").innerHTML = ''
+};            // Overlay functions
+/* Open */
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -57,13 +64,13 @@ async function ApiCall(urlDict, key) {
 
 //Check if data is still up-to-date and whether we even need to make an API call 
 
-async function fetchDashboardData(referenceId,targetDataKey) {
+async function fetchDashboardData(referenceId, targetDataKey) {
     console.log('fetching data for ' + targetDataKey)
     let remoteReferenceId = await ApiCall(urlObject, referenceId);
 
     //Get local information
     let localTargetData = JSON.parse(localStorage.getItem(targetDataKey));
-    let latestlocalReferenceId = localTargetData ? Math.max(...localTargetData.map(a=>a.id)) : 0
+    let latestlocalReferenceId = localTargetData ? Math.max(...localTargetData.map(a => a.id)) : 0
 
     //Perform the comparison
     if (remoteReferenceId['id'] == latestlocalReferenceId && localTargetData) {
@@ -163,8 +170,8 @@ function generatePlotlyChart(input_data, layout, config) {
 // Default setting
 var defaultSelectedPoints;
 var selectedPoints = [];
-var xbounds = [-Infinity,Infinity]
-var ybounds = [-Infinity,Infinity]
+var xbounds = [-Infinity, Infinity]
+var ybounds = [-Infinity, Infinity]
 
 // Plotly interaction functions
 function selectPoints(eventData) {
@@ -175,7 +182,7 @@ function selectPoints(eventData) {
 function zoomToPoints(xMin, xMax, yMin, yMax) {
     xbounds = [xMin, xMax];
     ybounds = [yMin, yMax];
-    recalculateRenderedData(selectedPoints,xbounds, ybounds);
+    recalculateRenderedData(selectedPoints, xbounds, ybounds);
 };
 
 function clickPoints() {
@@ -184,7 +191,7 @@ function clickPoints() {
 
 
 // Feed Vue the required final lists
-function recalculateRenderedData(selectedPoints=[], xbounds= [-Infinity, Infinity], ybounds = [-Infinity, Infinity]) {
+function recalculateRenderedData(selectedPoints = [], xbounds = [-Infinity, Infinity], ybounds = [-Infinity, Infinity]) {
     let dashboard_data = dataDict['dashboard_data']
     let homelist = dataDict['homelist']
     let rendered_points = []
@@ -244,41 +251,52 @@ function initializeVueApp() {
             componentKey: 0,
             homelist: null,
             pageNumber: 0,
-            size : 10,
+            size: 10,
         },
         methods: {
             forceRerender() {
                 this.pageNumber = 0
                 this.componentKey += 1;
             },
-            pageNext(){
+            pageNext() {
                 this.pageNumber++;
             },
-            pagePrevious(){
+            pagePrevious() {
                 this.pageNumber--;
             },
-            goToPage(index){
+            goToPage(index) {
                 this.pageNumber = index;
+            },
+            openNav(screenshot) {
+                console.log('opening NAV!')
+                console.log(typeof screenshot)
+                let imageItem = document.createElement("IMG")
+                imageItem.src = screenshot
+                document.getElementById('overlayContent').appendChild(imageItem)
+                document.getElementById("overlayCarousel").style.height = "100%";
+            
             }
+
+
 
         },
         computed: {
-            pageCount(){
+            pageCount() {
                 let l = this.homelist.length;
                 let s = this.size;
-                return Math.ceil(l/s)
+                return Math.ceil(l / s)
             },
-            paginatedData(){
+            paginatedData() {
                 const start = this.pageNumber * this.size,
-                      end = start + this.size
-                console.log([start,end])
-                return this.homelist.slice(start,end)
+                    end = start + this.size
+                console.log([start, end])
+                return this.homelist.slice(start, end)
             },
-            renderedButtonIndices(){
+            renderedButtonIndices() {
 
-                let startAndEndButton = [0,this.pageCount-1]
+                let startAndEndButton = [0, this.pageCount - 1]
                 console.log(startAndEndButton)
-                let relativePageButtons = [...Array(this.pageNumber+4).keys()].filter(a => a>this.pageNumber-4)
+                let relativePageButtons = [...Array(this.pageNumber + 4).keys()].filter(a => a > this.pageNumber - 4)
                 console.log(relativePageButtons)
                 console.log('testing renderedbuttonIndices')
                 return startAndEndButton.concat(relativePageButtons)
