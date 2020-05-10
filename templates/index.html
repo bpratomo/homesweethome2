@@ -80,6 +80,10 @@
                 <button @click="pagePrevious" :disabled="pageNumber==0">
                     Previous
                 </button>
+                <button v-for="index in [...Array(pageCount).keys()]" @click="goToPage(index)" >[[index +1]]</button>
+
+
+
                 <button @click="pageNext" :disabled="pageNumber >= pageCount -1">
                     Next
                 </button>

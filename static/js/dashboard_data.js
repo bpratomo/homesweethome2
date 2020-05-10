@@ -257,6 +257,9 @@ function initializeVueApp() {
             },
             pagePrevious(){
                 this.pageNumber--;
+            },
+            goToPage(index){
+                this.pageNumber = index;
             }
 
         },
