@@ -63,12 +63,12 @@ async function fetchDashboardData(referenceId,targetDataKey) {
 
     //Get local information
     let localTargetData = JSON.parse(localStorage.getItem(targetDataKey));
-    let latestlocalReferenceId = Math.max(...localTargetData.map(a=>a.id)) || 0
+    let latestlocalReferenceId = localTargetData ? Math.max(...localTargetData.map(a=>a.id)) : 0
     console.log(latestlocalReferenceId)
     console.log(remoteReferenceId['id'])
 
     //Perform the comparison
-    if (remoteReferenceId['id'] == latestlocalReferenceId) {
+    if (remoteReferenceId['id'] == latestlocalReferenceId && localTargetData) {
         console.log('Current data is up to date!')
 
         // Store information to datadict for further use
