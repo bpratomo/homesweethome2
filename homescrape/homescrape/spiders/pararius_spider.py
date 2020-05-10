@@ -118,7 +118,7 @@ class ParariusSpider(scrapy.Spider):
         offered_since_string            = response.xpath("//dd[contains(@class,'offered')]/span/text()").get()
         p['offered_since']              = convert_string_to_datetime(offered_since_string) 
 
-        year_of_construction_el         = int(response.xpath("//dd[contains(@class,'construction_period')]/span/text()").get())
+        year_of_construction_el         = response.xpath("//dd[contains(@class,'construction_period')]/span/text()").get()
         p['year_of_construction']       = int(year_of_construction_el) if year_of_construction_el.isdigit() else None
 
 

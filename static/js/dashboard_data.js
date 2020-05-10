@@ -62,11 +62,13 @@ async function fetchDashboardData(referenceId,targetDataKey) {
     let remoteReferenceId = await ApiCall(urlObject, referenceId);
 
     //Get local information
-    let localReferenceId = JSON.parse(localStorage.getItem(referenceId)) || 0
     let localTargetData = JSON.parse(localStorage.getItem(targetDataKey));
+    let latestlocalReferenceId = Math.max(...localTargetData.map(a=>a.id)) || 0
+    console.log(latestlocalReferenceId)
+    console.log(remoteReferenceId['id'])
 
     //Perform the comparison
-    if (remoteReferenceId['id'] == localReferenceId['id'] && localTargetData != null) {
+    if (remoteReferenceId['id'] == latestlocalReferenceId) {
         console.log('Current data is up to date!')
 
         // Store information to datadict for further use
@@ -81,7 +83,6 @@ async function fetchDashboardData(referenceId,targetDataKey) {
         dataDict[targetDataKey] = remoteTargetData
 
         // Store information to localstorage for future use
-        localStorage.setItem(referenceId, JSON.stringify(remoteReferenceId))
         localStorage.setItem(targetDataKey, JSON.stringify(remoteTargetData))
 
     };

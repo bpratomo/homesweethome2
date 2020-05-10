@@ -15,6 +15,7 @@ class HomeListView(ListView):
         context["cities"] = Home.objects.values('city').distinct()
         context["years"] = Home.objects.values('year_of_construction').distinct()
         context["property_types"] = Home.objects.values('type_of_property').distinct()
+        context["latesthomeid"] = Home.objects.order_by('-id').first()
         return context
     
 
