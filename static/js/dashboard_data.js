@@ -25,8 +25,8 @@ window.onload = async function () {
 function closeNav() {
     console.log('closing NAV!')
     document.getElementById("overlayCarousel").style.height = "0%";
-    document.getElementById("overlayContent").innerHTML = ''
-};            // Overlay functions
+    document.getElementById("innerCarousel").innerHTML = ''
+}; // Overlay functions
 /* Open */
 
 
@@ -267,14 +267,25 @@ function initializeVueApp() {
             goToPage(index) {
                 this.pageNumber = index;
             },
-            openNav(screenshot) {
+            openNav(screenshots, index) {
                 console.log('opening NAV!')
                 console.log(typeof screenshot)
-                let imageItem = document.createElement("IMG")
-                imageItem.src = screenshot
-                document.getElementById('overlayContent').appendChild(imageItem)
+                screenshots.forEach((screenshot, counter) => {
+                    let carouselitem = document.createElement("DIV")
+                    if (counter == index) {
+                        carouselitem.setAttribute("class", "carousel-item active")
+                    } else {
+                        carouselitem.setAttribute("class", "carousel-item")
+                    }
+
+                    let imageItem = document.createElement("IMG")
+                    imageItem.src = screenshot
+                    carouselitem.appendChild(imageItem)
+                    document.getElementById('innerCarousel').appendChild(carouselitem)
+                })
                 document.getElementById("overlayCarousel").style.height = "100%";
-            
+
+
             }
 
 

@@ -128,7 +128,7 @@ class ParariusSpider(scrapy.Spider):
 
         # Save screenshot links
         # first screenshot
-        link_to_screenshot = response.xpath('//div[@class="carrousel__item"]//img/@src').getall()
+        link_to_screenshot = response.xpath('//div[@class="carrousel__item"]//source/@srcset').getall()
         for link in link_to_screenshot:
             if "https://" in link and "media.pararius.nl" in link: 
                 s = ScreenshotItem(link=link, 

@@ -12,8 +12,19 @@
     <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
 
     <!-- Overlay content -->
-    <div id='overlayContent' class="overlay-content ">
-        
+    <div id='overlayContent' class="overlay-content carousel slide" data-ride="carousel">
+        <div id="innerCarousel" class="carousel-inner">
+
+        </div>
+        <a class="carousel-control-prev" href="#overlayContent" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#overlayContent" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+        </a>
+
     </div>
 
 </div>
@@ -121,12 +132,12 @@
                                     <template v-for="(screenshot,sindex) in item.screenshots">
 
                                         <div v-if="sindex==0" class="carousel-item active">
-                                            <img class="d-block gallery-fixed" @click="openNav(screenshot)"
+                                            <img class="d-block gallery-fixed" @click="openNav(item.screenshots,sindex)"
                                                 :src="screenshot" alt="First slide">
                                         </div>
                                         <div v-else class="carousel-item">
-                                            <img class="d-block gallery-fixed " @click="openNav(screenshot)"
-                                                :src="screenshot" alt="index">
+                                            <img class="d-block gallery-fixed "
+                                                @click="openNav(item.screenshots,sindex)" :src="screenshot" alt="index">
                                         </div>
                                     </template>
 
@@ -220,6 +231,8 @@
 
     /* The navigation links inside the overlay */
     .overlay a {
+        position: absolute;
+        top: 40%;
         padding: 8px;
         text-decoration: none;
         font-size: 36px;
