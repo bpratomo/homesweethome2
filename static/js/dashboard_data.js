@@ -163,7 +163,9 @@ function generatePlotlyChart(input_data, layout, config) {
 
 // Default setting
 var defaultSelectedPoints;
-
+var selectedPoints = [];
+var xbounds = [-Infinity,Infinity]
+var ybounds = [-Infinity,Infinity]
 
 // Plotly interaction functions
 function selectPoints(eventData) {
@@ -174,7 +176,7 @@ function selectPoints(eventData) {
 function zoomToPoints(xMin, xMax, yMin, yMax) {
     xbounds = [xMin, xMax];
     ybounds = [yMin, yMax];
-    recalculateRenderedData(xbounds=xbounds, ybounds=ybounds);
+    recalculateRenderedData(selectedPoints,xbounds, ybounds);
 };
 
 function clickPoints() {
