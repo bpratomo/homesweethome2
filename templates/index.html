@@ -5,7 +5,7 @@
 
 <div id='drf_latesthome' data-url='{% url 'dashboard-detail' 1 %}'></div>
 <div id='drf_dashboard_data' data-url='{% url 'dashboard-list' %}'></div>
-<div id='drf_homelisting' data-url='{% url 'dashboard-list' %}'></div>
+<div id='drf_homelisting' data-url='{% url 'home-list' %}'></div>
 
 {% comment %} Section Dropdown {% endcomment %}
 <div class='d-flex flex-row'>
@@ -50,17 +50,35 @@
 
 
 {% comment %} Section Dashboard {% endcomment %}
-    <div class='d-flex flex-row column-containers flex-wrap mw-60'>
+<div class='d-flex flex-row column-containers flex-wrap mw-60'>
 
-        <div class="container flex-grow-1 mw-50 first-column sticky-top bg-light p-2">
-            <div id='mydashboard'>
-            </div>
+    <div class="container flex-grow-1 mw-50 first-column sticky-top bg-light p-2">
+        <div id='mydashboard'>
         </div>
+    </div>
 
-        <div class="container second-column">
+    <div class="container second-column">
 
-            <div id='homelisting' :key="componentKey">
-                <template v-for="(item,index) in homelist" >
+        <div id='homelisting' :key="componentKey">
+            <div v-if="homelist ==null">
+                <div class="jumbotron jumbotron-fluid bg-light">
+                    <div class="container">
+                        <p class="lead">    
+                            <img src="https://media1.tenor.com/images/d6cd5151c04765d1992edfde14483068/tenor.gif?itemid=5662595"
+                                alt="Load Loading GIF - Load Loading Waiting GIFs"
+                                style="max-width: 100px; background-color: rgb(236, 236, 236);" width="25" height="25">
+                                Data is loading.....
+                        </p>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div v-else>
+
+
+                <template v-for="(item,index) in homelist">
                     <div class="card m-4">
                         <div class="card-body">
 
@@ -104,8 +122,9 @@
                 </template>
             </div>
         </div>
-
     </div>
+
+</div>
 
 
 
@@ -127,9 +146,11 @@
         margin-left: auto;
         margin-right: auto;
     }
-    #mydashboard{
+
+    #mydashboard {
         align-content: center;
     }
+
     .card .expandbuttondiv a.collapsed:after {
         content: '+ Show More';
     }
@@ -171,7 +192,7 @@
     .column-containers {
         top: 50px;
         position: sticky;
-        max-height:30vh;
+        max-height: 30vh;
     }
 </style>
 

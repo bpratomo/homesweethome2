@@ -7,9 +7,17 @@ document.body.appendChild(plotlyjscdn)
 
 // Render the whole page. Function described below
 window.onload = async function () {
-    this.loadUrls(urlHtmlId,urlObject);
-    let dashboardFetchStatus = await this.compareLatestHomeId();
+    this.loadUrls(urlHtmlId, urlObject);
+    let dashboardFetchStatus = await this.fetchDashboardData('latesthomeid','dashboard_data');
     this.InitializeDashboardAndList(dashboardFetchStatus);
+    let homelistFetchStatus = await this.fetchDashboardData('latesthomeid','homelist')
+    console.trace(homelistFetchStatus)
+    if (homelistFetchStatus) {
+        this.recalculateRenderedData()
+        
+    }
+
+
 
 };
 
@@ -22,16 +30,16 @@ window.onload = async function () {
 //Get all Rest framework URLs from the page
 
 var urlObject = {}; //Store the urls fetched from index.html
-var dataDict = {};  //Store the result of data fetched from Django Rest Framework
+var dataDict = {}; //Store the result of data fetched from Django Rest Framework
 
 var urlHtmlId = {
     latesthomeid: 'drf_latesthome',
     dashboard_data: 'drf_dashboard_data',
-    homelisting: 'drf_homelisting',
+    homelist: 'drf_homelisting',
 };
 
 
-function loadUrls(urlHtmlId,urlObject) {
+function loadUrls(urlHtmlId, urlObject) {
     for (const key in urlHtmlId) {
         const element = urlHtmlId[key];
         urlObject[key] = document.getElementById(element).getAttribute('data-url');
@@ -49,33 +57,32 @@ async function ApiCall(urlDict, key) {
 
 //Check if data is still up-to-date and whether we even need to make an API call 
 
-async function compareLatestHomeId() {
-    let remoteLatestHomeId = await ApiCall(urlObject, 'latesthomeid');
+async function fetchDashboardData(referenceId,targetDataKey) {
+    console.log('fetching data for ' + targetDataKey)
+    let remoteReferenceId = await ApiCall(urlObject, referenceId);
 
     //Get local information
-    let localLatestHomeId = JSON.parse(localStorage.getItem('latesthomeid'));
-    let localDashboardData = JSON.parse(localStorage.getItem('dashboard_data'));
+    let localReferenceId = JSON.parse(localStorage.getItem(referenceId)) || 0
+    let localTargetData = JSON.parse(localStorage.getItem(targetDataKey));
 
     //Perform the comparison
-    if (remoteLatestHomeId['id'] == localLatestHomeId['id'] && localDashboardData != null) {
+    if (remoteReferenceId['id'] == localReferenceId['id'] && localTargetData != null) {
         console.log('Current data is up to date!')
 
         // Store information to datadict for further use
-        dataDict['dashboard_data'] = localDashboardData
-        dataDict['latesthomeid'] = localLatestHomeId
+        dataDict[targetDataKey] = localTargetData
 
     } else {
         console.log('Data needs to be refreshed')
 
-        let remoteDashboardData = await ApiCall(urlObject, 'dashboard_data');
+        let remoteTargetData = await ApiCall(urlObject, targetDataKey);
 
         // Store information to datadict for further use
-        dataDict['dashboard_data'] = remoteDashboardData
-        dataDict['latesthomeid'] = localLatestHomeId
+        dataDict[targetDataKey] = remoteTargetData
 
         // Store information to localstorage for future use
-        localStorage.setItem('latesthomeid', JSON.stringify(remoteLatestHomeId))
-        localStorage.setItem('dashboard_data', JSON.stringify(remoteDashboardData))
+        localStorage.setItem(referenceId, JSON.stringify(remoteReferenceId))
+        localStorage.setItem(targetDataKey, JSON.stringify(remoteTargetData))
 
     };
     return true;
@@ -155,10 +162,7 @@ function generatePlotlyChart(input_data, layout, config) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Default setting
-var selectedPoints = [];
 var defaultSelectedPoints;
-var xbounds = [-Infinity, Infinity];
-var ybounds = [-Infinity, Infinity];
 
 
 // Plotly interaction functions
@@ -179,9 +183,10 @@ function clickPoints() {
 
 
 // Feed Vue the required final lists
-function recalculateRenderedData(selectedPoints, xbounds, ybounds) {
+function recalculateRenderedData(selectedPoints=[], xbounds= [-Infinity, Infinity], ybounds = [-Infinity, Infinity]) {
     let dashboard_data = dataDict['dashboard_data']
-
+    let homelist = dataDict['homelist']
+    let rendered_points = []
     let casecount = 0;
     // Case where no relayout has been done
     if (xbounds.indexOf(undefined) >= 0 | ybounds.indexOf(undefined) >= 0) {
@@ -199,17 +204,23 @@ function recalculateRenderedData(selectedPoints, xbounds, ybounds) {
 
     if (casecount == 2) {
         // No points are actually selected. Show everything. 
-        rendered_data = dashboard_data;
+        rendered_points = dashboard_data.map(item => item.id);
 
     } else {
 
-        rendered_data = dashboard_data.filter(
+        rendered_points = dashboard_data.filter(
             item => selectedPoints.includes(item.id) &&
             item[xVar] >= xbounds[0] && item[xVar] <= xbounds[1] &&
             item[yVar] >= ybounds[0] && item[yVar] <= ybounds[1]
 
+        ).map(
+            item => item.id
         );
     };
+    console.log(rendered_points)
+    let rendered_data = homelist.filter(item =>
+        rendered_points.includes(item.id))
+
 
     vueApp.homelist = rendered_data;
 
