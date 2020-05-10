@@ -168,13 +168,13 @@ var defaultSelectedPoints;
 // Plotly interaction functions
 function selectPoints(eventData) {
     selectedPoints = eventData.points.map(a => a.data.ids[a.pointNumber]);
-    recalculateRenderedData(selectedPoints, xbounds, ybounds)
+    recalculateRenderedData(selectedPoints)
 };
 
 function zoomToPoints(xMin, xMax, yMin, yMax) {
     xbounds = [xMin, xMax];
     ybounds = [yMin, yMax];
-    recalculateRenderedData(selectedPoints, xbounds, ybounds);
+    recalculateRenderedData(xbounds=xbounds, ybounds=ybounds);
 };
 
 function clickPoints() {
