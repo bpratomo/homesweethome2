@@ -7,29 +7,38 @@
 <div id='drf_dashboard_data' data-url='{% url 'dashboard-list' %}'></div>
 <div id='drf_homelisting' data-url='{% url 'home-list' %}'></div>
 <!-- Modal -->
-<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle">Explore the plot!</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-      
-        <ul>
-        <li><h5>Select, zoom, and relayout the scatterplot</h5></li>
-        <li><h5>See the corresponding residences</h5></li>
-        <li><h5>...</h5></li>
-        <li><h5>Profit!</h5></li>
-        </ul>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Explore the plot!</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <ul>
+                    <li>
+                        <h5>Select, zoom, and relayout the scatterplot</h5>
+                    </li>
+                    <li>
+                        <h5>See the corresponding residences</h5>
+                    </li>
+                    <li>
+                        <h5>...</h5>
+                    </li>
+                    <li>
+                        <h5>Profit!</h5>
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 <div id="overlayCarousel" class="overlay">
 
@@ -56,122 +65,130 @@
 
 
 {% comment %} Section Dashboard {% endcomment %}
-<div class='d-flex flex-row column-containers flex-wrap mw-60'>
+<div class='container-fluid'>
+    <div class="row">
 
-
-    <div class="container border flex-grow-1 mw-50 first-column sticky-top bg-light p-2 m-1">
-        <h3>Scatterplot of house prices by area color coded by cities</h3>
-<!-- Button trigger modal -->
-<button type="button" class="btn btn-dark m-2" data-toggle="modal" data-target="#exampleModalCenter">
-  Click here for instructions
-</button>
-
-
-
-
-
-        <div id='mydashboard'>
-        </div>
-    </div>
-
-    <div class="container second-column border m-1 p-2">
-        <h3>Selected residences </h3>
-
-        <div id='homelisting' :key="componentKey">
+        <div class="col-xl border bg-light m-1">
+            <div class="sticky-top first-column">
+                <h3>Scatterplot of house prices by area color coded by cities</h3>
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-dark m-2" data-toggle="modal" data-target="#exampleModalCenter">
+                    Click here for instructions
+                </button>
 
 
 
-            <div v-if="homelist ==null">
-                <div class="jumbotron jumbotron-fluid bg-light">
-                    <div class="container">
-                        <p class="lead">
-                            <img src="https://media1.tenor.com/images/d6cd5151c04765d1992edfde14483068/tenor.gif?itemid=5662595"
-                                alt="Load Loading GIF - Load Loading Waiting GIFs"
-                                style="max-width: 100px; background-color: rgb(236, 236, 236);" width="25" height="25">
-                            Data is loading.....
-                        </p>
-                    </div>
+
+
+                <div id='mydashboard'>
                 </div>
-
-
             </div>
+        </div>
 
-            <div v-else>
+        <div class="col-xl border m-1 p-2">
+            <h3>Selected residences </h3>
 
-                <button @click="pagePrevious" class="btn btn-dark btn-sm m-1" :disabled="pageNumber==0">
-                    Previous
-                </button>
-
-
-                <template v-for="index in [...Array(pageCount).keys()]">
-                    <span v-if="renderedButtonIndices.includes(index)">
-                        <button @click="goToPage(index)" class="btn btn-dark btn-sm m-1"
-                            v-bind:class="{ active: index==pageNumber }">[[index +1]]</button>
-                    </span>
-                    <span v-if="index-pageNumber==5|pageNumber-index==5">...</span>
-                </template>
+            <div id='homelisting' :key="componentKey">
 
 
 
-                <button @click="pageNext" class="btn btn-dark btn-sm m-1" :disabled="pageNumber >= pageCount -1">
-                    Next
-                </button>
-                <template v-for="(item,index) in paginatedData">
-                    <div class="card m-4">
-                        <div class="card-body">
-
-                            <div :id="'carousel'+index" class="carousel slide bg-dark h-50 mh-50" data-ride="carousel">
-                                <div class="carousel-inner" role="listbox">
-                                    <template v-for="(screenshot,sindex) in item.screenshots">
-
-                                        <div v-if="sindex==0" class="carousel-item active">
-                                            <img class="d-block gallery-fixed" @click="openNav(item.screenshots,sindex)"
-                                                :src="screenshot" alt="First slide">
-                                        </div>
-                                        <div v-else class="carousel-item">
-                                            <img class="d-block gallery-fixed "
-                                                @click="openNav(item.screenshots,sindex)" :src="screenshot" alt="index">
-                                        </div>
-                                    </template>
-
-                                </div>
-
-                                <a class="carousel-control-prev" :href="'#carousel'+index" role="button"
-                                    data-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="sr-only">Previous</span>
-                                </a>
-                                <a class="carousel-control-next" :href="'#carousel'+index" role="button"
-                                    data-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="sr-only">Next</span>
-                                </a>
-                            </div>
-
-                            <hr />
-
-                            <h4 class="card-title"><a :href="item.property_source_url"><span
-                                        class='capitalized'>[[item.property_name]]</span> in <span
-                                        class='capitalized'>[[item.city | capitalize]]</span></a></h4>
-                            <h5>💸 Price: €[[item.price]] per month | 🏠 Area: [[item.area]] m2 | 🏗️ Built
-                                on:[[item.year_of_construction]] </h5>
-                            <div :id="'description'+index" class="card-text collapse" aria-expanded="false">
-
-                                <br>
-                                <p v-html="item.description_from_tenant"></p>
-
-                            </div>
-                            <div class='expandbuttondiv'>
-                                <a role="button" class="collapsed" data-toggle="collapse" :href="'#description'+index"
-                                    aria-expanded="false" aria-controls="collapseExample"></a>
-                            </div>
+                <div v-if="homelist ==null">
+                    <div class="jumbotron jumbotron-fluid bg-light">
+                        <div class="container">
+                            <p class="lead">
+                                <img src="https://media1.tenor.com/images/d6cd5151c04765d1992edfde14483068/tenor.gif?itemid=5662595"
+                                    alt="Load Loading GIF - Load Loading Waiting GIFs"
+                                    style="max-width: 100px; background-color: rgb(236, 236, 236);" width="25"
+                                    height="25">
+                                Data is loading.....
+                            </p>
                         </div>
                     </div>
-                </template>
+
+
+                </div>
+
+                <div v-else>
+
+                    <button @click="pagePrevious" class="btn btn-dark btn-sm m-1" :disabled="pageNumber==0">
+                        Previous
+                    </button>
+
+
+                    <template v-for="index in [...Array(pageCount).keys()]">
+                        <span v-if="renderedButtonIndices.includes(index)">
+                            <button @click="goToPage(index)" class="btn btn-dark btn-sm m-1"
+                                v-bind:class="{ active: index==pageNumber }">[[index +1]]</button>
+                        </span>
+                        <span v-if="index-pageNumber==5|pageNumber-index==5">...</span>
+                    </template>
+
+
+
+                    <button @click="pageNext" class="btn btn-dark btn-sm m-1" :disabled="pageNumber >= pageCount -1">
+                        Next
+                    </button>
+                    <template v-for="(item,index) in paginatedData">
+                        <div class="card m-4">
+                            <div class="card-body">
+
+                                <div :id="'carousel'+index" class="carousel slide bg-dark h-50 mh-50"
+                                    data-ride="carousel">
+                                    <div class="carousel-inner" role="listbox">
+                                        <template v-for="(screenshot,sindex) in item.screenshots">
+
+                                            <div v-if="sindex==0" class="carousel-item active">
+                                                <img class="d-block gallery-fixed"
+                                                    @click="openNav(item.screenshots,sindex)" :src="screenshot"
+                                                    alt="First slide">
+                                            </div>
+                                            <div v-else class="carousel-item">
+                                                <img class="d-block gallery-fixed "
+                                                    @click="openNav(item.screenshots,sindex)" :src="screenshot"
+                                                    alt="index">
+                                            </div>
+                                        </template>
+
+                                    </div>
+
+                                    <a class="carousel-control-prev" :href="'#carousel'+index" role="button"
+                                        data-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="sr-only">Previous</span>
+                                    </a>
+                                    <a class="carousel-control-next" :href="'#carousel'+index" role="button"
+                                        data-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="sr-only">Next</span>
+                                    </a>
+                                </div>
+
+                                <hr />
+
+                                <h4 class="card-title"><a :href="item.property_source_url"><span
+                                            class='capitalized'>[[item.property_name]]</span> in <span
+                                            class='capitalized'>[[item.city | capitalize]]</span></a></h4>
+                                <h5>💸 Price: €[[item.price]] per month | 🏠 Area: [[item.area]] m2 | 🏗️ Built
+                                    on:[[item.year_of_construction]] </h5>
+                                <div :id="'description'+index" class="card-text collapse" aria-expanded="false">
+
+                                    <br>
+                                    <p v-html="item.description_from_tenant"></p>
+
+                                </div>
+                                <div class='expandbuttondiv'>
+                                    <a role="button" class="collapsed" data-toggle="collapse"
+                                        :href="'#description'+index" aria-expanded="false"
+                                        aria-controls="collapseExample"></a>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
             </div>
         </div>
-    </div>
 
+    </div>
 </div>
 
 
@@ -195,7 +212,7 @@
         width: 100%;
         position: fixed;
         /* Stay in place */
-        z-index: 1;
+        z-index: 99999999999;
         /* Sit on top */
         left: 0;
         top: 0;
@@ -211,7 +228,7 @@
 
     /* Position the content inside the overlay */
     .overlay-content {
-        position: relative;
+        position: absolute;
         top: 25%;
         /* 25% from the top */
         width: 100%;
@@ -264,15 +281,6 @@
     }
 
 
-    .second-column .gallery-fixed {
-        max-height: 400px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    #mydashboard {
-        align-content: center;
-    }
 
     .card .expandbuttondiv a.collapsed:after {
         content: '+ Show More';
@@ -292,14 +300,9 @@
         height: 10em;
     }
 
-    .column-containers .second-column {
-        overflow-y: scroll;
-        height: 100vh
-    }
-
-    .first-column {
-        top: 50px;
-    }
+.first-column{
+    top:60px
+}
 
     .column-containers {
         top: 50px;
