@@ -233,8 +233,12 @@ function recalculateRenderedData(selectedPoints = [], xbounds = [-Infinity, Infi
     vueApp.homelist = rendered_data;
 
     vueApp.forceRerender();
+    let listingBadge =document.getElementById('listing-badge');
+    listingBadge.classList.remove("deactivated")
+
 
 };
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

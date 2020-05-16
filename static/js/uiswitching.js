@@ -6,6 +6,7 @@ function activateListing() {
 
     let listing = document.getElementById('listingcolumn');
     let listingNav = document.getElementById('listing-nav');
+    let listingBadge = document.getElementById('listing-badge');
 
     let scatterplot = document.getElementById('scatterplot-column');
     let scatterNav = document.getElementById('scatter-nav');
@@ -20,6 +21,7 @@ function activateListing() {
     listing.classList.add("activated")
     listing.classList.remove("deactivated")
     listingNav.classList.add("active")
+    listingBadge.classList.add("deactivated")
     
 }
 
