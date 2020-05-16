@@ -40,6 +40,9 @@
         </div>
     </div>
 </div>
+
+
+{% comment %} Overlay Carousel {% endcomment %}
 <div id="overlayCarousel" class="overlay">
 
     <!-- Button to close the overlay navigation -->
@@ -64,28 +67,38 @@
 </div>
 
 
+{% comment %} Navtab for mobile view{% endcomment %}
+<ul class="nav nav-pills justify-content-center sticky-top view-switcher bg-light p-2 min-vh-10">
+  <li class="nav-item">
+    <a id="scatter-nav" class="nav-link active" onclick="activateScatter()" href="#">Scatterplot</a>
+  </li>
+  <li class="nav-item">
+    <a id="listing-nav" class="nav-link" onclick="activateListing()" href="#">Listing</a>
+  </li>
+  <li class="nav-item">
+    <a id="maps-nav" class="nav-link disabled" href="#">Maps (coming soon!) </a>
+  </li>
+</ul>
+
+
 {% comment %} Section Dashboard {% endcomment %}
 <div class='container-fluid'>
     <div class="row">
 
-        <div class="col-xl border bg-light m-1">
-            <div class="sticky-top first-column">
+        <div id='scatterplot-column' class="col-xl first-column sticky-top border bg-light">
+            <div class="sticky-top first-column p-1">
                 <h3>Scatterplot of house prices by area color coded by cities</h3>
                 <!-- Button trigger modal -->
                 <button type="button" class="btn btn-dark m-2" data-toggle="modal" data-target="#exampleModalCenter">
                     Click here for instructions
                 </button>
 
-
-
-
-
                 <div id='mydashboard'>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl border m-1 p-2">
+        <div id='listingcolumn' class="col-xl border m-1 p-2 second-column bg-light">
             <h3>Selected residences </h3>
 
             <div id='homelisting' :key="componentKey">
@@ -184,6 +197,21 @@
                             </div>
                         </div>
                     </template>
+                    <button @click="pagePrevious" class="btn btn-dark btn-sm m-1" :disabled="pageNumber==0">
+                        Previous
+                    </button>
+
+
+                    <template v-for="index in [...Array(pageCount).keys()]">
+                        <span v-if="renderedButtonIndices.includes(index)">
+                            <button @click="goToPage(index)" class="btn btn-dark btn-sm m-1"
+                                v-bind:class="{ active: index==pageNumber }">[[index +1]]</button>
+                        </span>
+                        <span v-if="index-pageNumber==5|pageNumber-index==5">...</span>
+                    </template>
+                    <button @click="pageNext" class="btn btn-dark btn-sm m-1" :disabled="pageNumber >= pageCount -1">
+                        Next
+                    </button>
                 </div>
             </div>
         </div>
@@ -205,119 +233,12 @@
 
 
 {% block scripts %}
-<style>
-    .overlay {
-        /* Height & width depends on how you want to reveal the overlay (see JS below) */
-        height: 0;
-        width: 100%;
-        position: fixed;
-        /* Stay in place */
-        z-index: 99999999999;
-        /* Sit on top */
-        left: 0;
-        top: 0;
-        background-color: rgb(0, 0, 0);
-        /* Black fallback color */
-        background-color: rgba(0, 0, 0, 0.9);
-        /* Black w/opacity */
-        overflow-x: hidden;
-        /* Disable horizontal scroll */
-        transition: 0.5s;
-        /* 0.5 second transition effect to slide in or slide down the overlay (height or width, depending on reveal) */
-    }
 
-    /* Position the content inside the overlay */
-    .overlay-content {
-        position: absolute;
-        top: 25%;
-        /* 25% from the top */
-        width: 100%;
-        /* 100% width */
-        text-align: center;
-        /* Centered text/links */
-        margin-top: 30px;
-        /* 30px top margin to avoid conflict with the close button on smaller screens */
-    }
-
-    /* The navigation links inside the overlay */
-    .overlay a {
-        position: absolute;
-        top: 40%;
-        padding: 8px;
-        text-decoration: none;
-        font-size: 36px;
-        color: #818181;
-        display: block;
-        /* Display block instead of inline */
-        transition: 0.3s;
-        /* Transition effects on hover (color) */
-    }
-
-    /* When you mouse over the navigation links, change their color */
-    .overlay a:hover,
-    .overlay a:focus {
-        color: #f1f1f1;
-    }
-
-    /* Position the close button (top right corner) */
-    .overlay .closebtn {
-        position: absolute;
-        top: 50px;
-        right: 45px;
-        font-size: 60px;
-    }
-
-    /* When the height of the screen is less than 450 pixels, change the font-size of the links and position the close button again, so they don't overlap */
-    @media screen and (max-height: 450px) {
-        .overlay a {
-            font-size: 20px
-        }
-
-        .overlay .closebtn {
-            font-size: 40px;
-            top: 15px;
-            right: 35px;
-        }
-    }
-
-
-
-    .card .expandbuttondiv a.collapsed:after {
-        content: '+ Show More';
-    }
-
-    .card .expandbuttondiv a:not(.collapsed):after {
-        content: '- Show Less';
-    }
-
-    .card .column-containers .card-text .collapse:not(.show) {
-        display: block;
-        height: 10 em;
-        overflow: hidden;
-    }
-
-    .card .column-containers .collapsing {
-        height: 10em;
-    }
-
-.first-column{
-    top:60px
-}
-
-    .column-containers {
-        top: 50px;
-        position: sticky;
-        max-height: 30vh;
-    }
-
-    .capitalized {
-        text-transform: capitalize
-    }
-</style>
-
+<link rel="stylesheet" href={% static 'css/home.css' %}>
 
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="{% static 'js/dashboard_data.js' %}"></script>
+<script src="{% static 'js/uiswitching.js' %}"></script>
 
 
 {% endblock scripts %}
