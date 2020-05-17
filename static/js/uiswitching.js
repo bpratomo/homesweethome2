@@ -1,4 +1,9 @@
-
+/* Close */
+function closeNav() {
+    console.log('closing NAV!')
+    document.getElementById("overlayCarousel").style.height = "0%";
+    document.getElementById("innerCarousel").innerHTML = ''
+}; // Overlay functions
 
 
 
