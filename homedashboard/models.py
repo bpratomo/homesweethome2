@@ -37,7 +37,7 @@ class Home(models.Model):
     offered_since = models.DateTimeField()
     available_from = models.DateTimeField()
     price = models.FloatField()
-    rental_period = models.TextField(default='') 
+    rental_period = models.TextField(default='',null=True) 
 
     # building information
     year_of_construction = models.IntegerField(null=True)

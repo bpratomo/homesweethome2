@@ -2,6 +2,7 @@ import scrapy
 import time
 from datetime import datetime
 from homescrape.items import HomeItem, ScreenshotItem
+from scrapy.shell import inspect_response
 
 
 list_of_cities = [
@@ -58,8 +59,11 @@ def convert_string_to_datetime(datetime_string):
 
 def get_dd_text(response, target_class):
     xpath_string = "//dd[contains(@class,'"+ target_class +"')]/span/text()"
+    
+    result = response.xpath(xpath_string).get()
     return response.xpath(xpath_string).get()
 
+    
 
 class ParariusSpider(scrapy.Spider):
     name = 'pararius'
@@ -68,8 +72,10 @@ class ParariusSpider(scrapy.Spider):
     def parse(self, response):
         # #Follow links to each specific house
         for href in response.xpath("//ul[@class='search-list']/li//h2/a/@href"):
-            time.sleep(3)
+            time.sleep(1)
             # print('traversing to house {}'.format(href))
+
+            
             yield response.follow(href, self.parse_property)
 
         # Follow links to next page (maximum 5 pages)
@@ -78,7 +84,7 @@ class ParariusSpider(scrapy.Spider):
             if page_number == '10': # maximum page number
                 break
             else:
-                time.sleep(3)
+                time.sleep(1)
                 # print('traversing to next page {}'.format(href))
                 yield response.follow(href, self.parse)
 
@@ -128,7 +134,7 @@ class ParariusSpider(scrapy.Spider):
         #######################################################################################################################################################################
         # building information 
         year_of_construction_el         = get_dd_text(response,"construction_period")
-        p['year_of_construction']       = int(year_of_construction_el) if year_of_construction_el.isdigit() else None
+        p['year_of_construction']       = int(year_of_construction_el) if year_of_construction_el else None
         
         p['area']                       = convert_area_text_to_number(get_dd_text(response,"surface_area"))
         p['type_of_property']           = get_dd_text(response,'dwelling')
@@ -161,9 +167,8 @@ class ParariusSpider(scrapy.Spider):
             srcset = link_to_srcset[counter]
             src = link_to_screenshot[counter]
 
-            if "https://" in link and "media.pararius.nl" in src: 
-                s = ScreenshotItem(
-                    sequence = counter,
+            if "https://" in src and "media.pararius.nl" in src: 
+                s = ScreenshotItem(sequence = counter,
                     srcset = srcset,
                     link=src, 
                     home = homerecord
