@@ -1,7 +1,7 @@
 import scrapy 
 import time
 from datetime import datetime
-from homescrape.items import HomeItem, ScreenshotItem, DistanceItem
+from homescrape.items import HomeItem, ScreenshotItem
 
 
 list_of_cities = [
@@ -75,16 +75,16 @@ class ParariusSpider(scrapy.Spider):
         # Follow links to next page (maximum 5 pages)
         for href in response.xpath("//a[@aria-label='Next']/@href"):
             page_number = href.get().split('-')[-1]
-            if page_number == '6': # maximum page number
+            if page_number == '10': # maximum page number
                 break
             else:
                 time.sleep(3)
-                print('traversing to next page {}'.format(href))
+                # print('traversing to next page {}'.format(href))
                 yield response.follow(href, self.parse)
 
         
     def parse_property(self,response):
-        # print("parse_property function triggered")
+        print("parse_property function triggered")
 
 
         url_elements = response.url.split('/')
@@ -141,25 +141,32 @@ class ParariusSpider(scrapy.Spider):
         #######################################################################################################################################################################
         # utilities and amenities
         p['energy_label']               = get_dd_text(response,'energy-label')
-        p['including_utilities']        = "including" in feature_description_text.lower()
+        p['including_utilities']        = True if "including" in feature_description_text.lower() else False
         p['facilities']                 = get_dd_text(response,"facilities")
-        p['balcony_present']            = get_dd_text(response,"balcony")
-        p['garden_present']             = get_dd_text(response,"garden")
-        p['storage_present']            = get_dd_text(response,"storage")
-        p['garage_present']             = get_dd_text(response,"garage")
+        p['balcony_present']            = True if get_dd_text(response,"balcony")  == "Present" else False
+        p['garden_present']             = True if get_dd_text(response,"garden")   == "Present" else False
+        p['storage_present']            = True if get_dd_text(response,"storage")  == "Present" else False
+        p['garage_present']             = True if get_dd_text(response,"garage")   == "Present" else False
 
 
         homerecord = p.save()
 
 
-
+        #######################################################################################################################################################################
         # Save screenshot links
-        # first screenshot
-        link_to_screenshot = response.xpath('//div[@class="carrousel__item"]//source/@srcset').getall()
-        for link in link_to_screenshot:
-            if "https://" in link and "media.pararius.nl" in link: 
-                s = ScreenshotItem(link=link, 
-                                    home = homerecord
+        link_to_srcset = response.xpath('//div[contains(@class,"carrousel--listing-detail")]//source/@srcset').getall()
+        link_to_screenshot = response.xpath('//div[contains(@class,"carrousel--listing-detail")]//img/@src').getall()
+        carousel_size = len(link_to_srcset)
+        for counter in range(carousel_size):
+            srcset = link_to_srcset[counter]
+            src = link_to_screenshot[counter]
+
+            if "https://" in link and "media.pararius.nl" in src: 
+                s = ScreenshotItem(
+                    sequence = counter,
+                    srcset = srcset,
+                    link=src, 
+                    home = homerecord
                                     )
                 s.save()
                          

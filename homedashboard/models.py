@@ -59,9 +59,11 @@ class Home(models.Model):
     garage_present = models.BooleanField(default=False) 
 
 class Screenshot(models.Model):
+    sequence = models.IntegerField(default=0)
     home = models.ForeignKey(
         Home, related_name='screenshots', on_delete=models.CASCADE)
     link = models.TextField()
+    srcset = models.TextField()
 
     def __str__(self):
         return '%s' % (self.link)

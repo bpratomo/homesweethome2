@@ -17,7 +17,7 @@ from scrapy_djangoitem import DjangoItem
 
 
 
-from homedashboard.models import Home,Screenshot,Distance
+from homedashboard.models import Home,Screenshot
 
 
 class HomeItem(DjangoItem):
@@ -25,8 +25,5 @@ class HomeItem(DjangoItem):
 
 class ScreenshotItem(DjangoItem):
     django_model = Screenshot
-    
-class DistanceItem(DjangoItem):
-    django_model = Distance
-    
+
 
