@@ -13,6 +13,20 @@ list_of_cities = [
     'den-haag',
     'hilversum',
     'almere',
+    'purmerend',
+    'zaandam',
+    'haarlem',
+    'hoofddorp',
+    'deventer',
+    'eindhoven',
+    'amstelveen',
+    'zeist',
+    'soest',
+    'amersfoort',
+    'apeldoorn',
+    'arnhem',
+    'tilburg',
+    'breda',
 ]
 
 start_url_setting = [
@@ -42,8 +56,9 @@ def convert_string_to_datetime(datetime_string):
 
     return datetime_value
 
-def get_text(response, xpath_selector):
-    return response.xpath(xpath_selector).get()
+def get_dd_text(response, target_class):
+    xpath_string = "//dd[contains(@class,'"+ target_class +"')]/span/text()"
+    return response.xpath(xpath_string).get()
 
 
 class ParariusSpider(scrapy.Spider):
@@ -76,24 +91,24 @@ class ParariusSpider(scrapy.Spider):
         
 
         p = HomeItem()
+        #######################################################################################################################################################################
+        # General metadata information
         p['id_from_website']            = url_elements[-2]
+        p['property_website_source']    = 'Pararius'
+        p['property_source_url']        = response.url
         p['property_name']              = url_elements[-1]
+        #######################################################################################################################################################################
+        # Location
+        p['city']                       = url_elements[-3]
         p['street']                     = response.xpath("//a[@class='breadcrumbs__link breadcrumbs__link--street']/text()").get() 
         p['region']                     = response.xpath("//a[@class='breadcrumbs__link breadcrumbs__link--district']/text()").get() 
         p['postcode']                   = response.xpath("//div[@class ='listing-detail-summary__location']/text()").get()[:7] 
+
+        #######################################################################################################################################################################
+        # Renting information 
         p['price']                      = float(response.xpath("//meta[@itemprop='price']/@content").get())
-
-        #######################################################################################################################################################################
-        feature_description_text        =  response.xpath("//dd[@class='listing-features__description listing-features__description--for_rent_price']/span/text()").get() 
-        p['including_utilities']          = "including" in feature_description_text.lower()
-        p['state_of_furnishing']        = "unfurnished" if "unfurnished" in feature_description_text else "furnished"
-
-        p['area']                       = convert_area_text_to_number(response.xpath("//dd[contains(@class,'surface_area')]/span/text()").get())
-        p['number_of_bedrooms']         = response.xpath("//dd[contains(@class,'number_of_bedrooms')]/span/text()").get()
-
-        p['energy_label']               = response.xpath("//dd[contains(@class,'energy-label')]/span/text()").get()
-
-        #######################################################################################################################################################################
+        p['tenant_contact_information'] = str(response.xpath("//a[contains(@class, 'telephone')]/@data-telephone").get())
+        feature_description_text        =  get_dd_text(response,"for_rent_price")
 
         description_paragraphs          = response.xpath("//div[contains(@class,'additional')]//p")
         description_text                = []
@@ -101,25 +116,37 @@ class ParariusSpider(scrapy.Spider):
             raw_text = paragraph.get()
             clean_text = raw_text.replace('<p>','').replace('</p>','')
             description_text.append(paragraph.get())
-
         p['description_from_tenant']    = ' '.join(description_text)
-        # p['tenant_contact_information'] = str(response.xpath("//a[contains(@class, 'telephone')]/@data-telephone").get())
-        p['property_website_source']    = 'Pararius'
-        p['property_source_url']        = response.url
-        p['city']                       = url_elements[-3]
-        p['type_of_property']           = response.xpath("//dd[contains(@class,'dwelling')]/span/text()").get()
 
-        #######################################################################################################################################################################
-
-        available_from_string           = response.xpath("//dd[contains(@class,'acceptance')]/span/text()").get()
-
+        available_from_string           = get_dd_text(response,"acceptance")
         p['available_from']             = convert_string_to_datetime(available_from_string)
 
-        offered_since_string            = response.xpath("//dd[contains(@class,'offered')]/span/text()").get()
+        offered_since_string            = get_dd_text(response,"offered")
         p['offered_since']              = convert_string_to_datetime(offered_since_string) 
+        p['rental_period']              = get_dd_text(response,'contract_duration')
 
-        year_of_construction_el         = response.xpath("//dd[contains(@class,'construction_period')]/span/text()").get()
+        #######################################################################################################################################################################
+        # building information 
+        year_of_construction_el         = get_dd_text(response,"construction_period")
         p['year_of_construction']       = int(year_of_construction_el) if year_of_construction_el.isdigit() else None
+        
+        p['area']                       = convert_area_text_to_number(get_dd_text(response,"surface_area"))
+        p['type_of_property']           = get_dd_text(response,'dwelling')
+        p['type_of_construction']       = get_dd_text(response,'construction_type')
+        p['number_of_bedrooms']         = get_dd_text(response,'number_of_bedrooms')
+        p['number_of_rooms']            = get_dd_text(response,'number_of_rooms')
+        p['number_of_bathrooms']        = get_dd_text(response,'number_of_bathrooms')
+        p['state_of_furnishing']        = "semi-furnished" if "semi-furnished" in feature_description_text else "furnished"
+
+        #######################################################################################################################################################################
+        # utilities and amenities
+        p['energy_label']               = get_dd_text(response,'energy-label')
+        p['including_utilities']        = "including" in feature_description_text.lower()
+        p['facilities']                 = get_dd_text(response,"facilities")
+        p['balcony_present']            = get_dd_text(response,"balcony")
+        p['garden_present']             = get_dd_text(response,"garden")
+        p['storage_present']            = get_dd_text(response,"storage")
+        p['garage_present']             = get_dd_text(response,"garage")
 
 
         homerecord = p.save()
@@ -138,21 +165,4 @@ class ParariusSpider(scrapy.Spider):
                          
 
 
-    # def parse_distances(self,response):
-    #     print('parsing distance function activated')
-    #     print(response.meta['homerecord'])
-
-    #     # Transit distances
-    #     category = 'transit'
-    #     base_xpath_selector = '//ul[contains(@class, "points-of-interest__list--transit")]/li/ul/li[@class="points-of-interest__poi"]'
-    #     list_of_transits_labels = response.xpath(base_xpath_selector+'/span[@class="points-of-interest__label"]/text()').getall()
-    #     list_of_transits_distances = response.xpath(base_xpath_selector+'/span[@class="points-of-interest__distance"]/text()').getall()
-
-    #     for i in range(len(list_of_transits_labels)):
-    #         print(list_of_transits_labels[i]+list_of_transits_distances[i])
-
-        # Education distances
-
-
-        # Grocery distances
 
